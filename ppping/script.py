@@ -18,6 +18,8 @@ def set_args():
 
 def main():
     args = set_args()
+    if len(sys.argv) == 1:
+        sys.stderr.write('ppping: try \'ppping --help\'\n')
     p = PPPing(args.args, args.timeout, args.scale, args.length, args.space, args.duration)
     try:
         curses.wrapper(p.run)
