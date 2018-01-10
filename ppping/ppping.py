@@ -7,7 +7,7 @@ import socket
 from .line import Line
 from .parser import PingResult
 
-__VERSION__ = '0.1.0'
+__VERSION__ = '0.1.1'
 
 RTT_DIGIT = 5
 INTERVAL = 0.05
