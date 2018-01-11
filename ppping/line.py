@@ -1,3 +1,6 @@
+DECIMAL_PLACES = 2
+
+
 class Line(object):
     def __init__(self, nstage, arg=''):
         self.arg = arg
@@ -11,7 +14,7 @@ class Line(object):
     def add_info(self, ping_result):
         self.host = ping_result.hostname
         self.address = ping_result.address
-        self.rtt = str(ping_result.time)
+        self.rtt = str(round(ping_result.time, 2))
 
     def add_char(self, char):
         self.line += char
