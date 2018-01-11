@@ -9,8 +9,9 @@ from .parser import PingResult
 
 __VERSION__ = '0.1.2'
 
-RTT_DIGIT = 5
+RTT_DIGIT = 6
 INTERVAL = 0.05
+NHEADERS = 3
 
 
 class PPPing(object):
@@ -44,10 +45,9 @@ class PPPing(object):
     def run(self, stdscr):
         begin = time.monotonic()
 
-        nheaders = 4
         stdscr.clear()
 
-        lines = {h: Line(i + nheaders, arg=h) for i, h in enumerate(self.args)}
+        lines = {h: Line(i + NHEADERS + 1, arg=h) for i, h in enumerate(self.args)}
         host_len = 0
 
         hostname = socket.gethostname()
@@ -74,18 +74,18 @@ class PPPing(object):
                 host_len = max(max([len(v.host) for v in lines.values()]), host_len)
                 address_len = max([len(v.address) for v in lines.values()])
 
-                _, x = stdscr.getmaxyx()
                 version = 'PPPING v{}'.format(__VERSION__)
-                stdscr.addstr(0, 0, version.rjust(int((x + len(version)) / 2 - 1)), self.mode)
+                n = (arg_len + host_len + address_len + RTT_DIGIT + self.result_len + 5 * self.space) // 2
+                stdscr.addstr(0, n, version, self.mode)
 
                 stdscr.addstr(1, self.space, info, self.mode)
 
-                stdscr.addstr(nheaders - 1, self.space, '{}{}{}{}{}'.format('args'.ljust(arg_len + self.space),
-                                                                            'host'.ljust(host_len + self.space),
-                                                                            'address'.ljust(address_len + self.space),
-                                                                            'rtt'.ljust(RTT_DIGIT + self.space),
-                                                                            'result'.ljust(self.result_len),
-                                                                            ), self.mode)
+                stdscr.addstr(NHEADERS, self.space, '{}{}{}{}{}'.format('args'.ljust(arg_len + self.space),
+                                                                        'host'.ljust(host_len + self.space),
+                                                                        'address'.ljust(address_len + self.space),
+                                                                        'rtt'.ljust(RTT_DIGIT + self.space),
+                                                                        'result'.ljust(self.result_len),
+                                                                        ), self.mode)
 
                 stdscr.addstr(line.x_pos(), self.space - 1,
                               '>' + line.get_line(arg_len, host_len, address_len, RTT_DIGIT, self.space),
