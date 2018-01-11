@@ -76,7 +76,7 @@ class PPPing(object):
 
                 version = 'PPPING v{}'.format(__VERSION__)
                 n = (arg_len + host_len + address_len + RTT_DIGIT + self.result_len + 5 * self.space) // 2
-                stdscr.addstr(0, n, version, self.mode)
+                stdscr.addstr(0, 0, version.rjust(n + len(version) // 2), self.mode)
 
                 stdscr.addstr(1, self.space, info, self.mode)
 
