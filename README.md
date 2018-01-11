@@ -17,6 +17,11 @@ $ pip install ppping
 ```bash
 $ ppping foo.com bar.org WW.XX.YY.ZZ
 ```
+Future help
+
+```bash
+$ ppping --help
+```
 
 ## License
 MIT
