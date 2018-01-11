@@ -12,5 +12,11 @@ Petty Plain Ping Tool like [deadman](https://github.com/upa/deadman)
 $ pip install ppping
 ```
 
+# Usage
+
+```bash
+$ ppping foo.com bar.org WW.XX.YY.ZZ
+```
+
 ## License
 MIT
