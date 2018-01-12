@@ -1,6 +1,6 @@
-class ParserError(RuntimeError):
+class PingParserError(RuntimeError):
     def __str__(self):
-        return 'Could not parse message.'
+        return 'Could not parse ping message.'
 
 
 class PingResult(object):
@@ -19,14 +19,14 @@ class PingResult(object):
                 self.hostname = sp[-5][:-1]
                 self.address = self.hostname
             else:
-                raise ParserError(self.raw)
+                raise PingParserError(self.raw)
 
             self.icmp_seq = int(sp[-4].split('=')[-1])
             self.ttl = int(sp[-3].split('=')[-1])
             self.time = float(sp[-2].split('=')[-1])
 
         except ValueError:
-            raise ParserError
+            raise PingParserError
 
     def __str__(self):
         return 'host={}, address={}, icmp_sec={}, ttl={}, time={}'.\
