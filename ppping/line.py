@@ -2,8 +2,9 @@ DECIMAL_PLACES = 2
 
 
 class Line(object):
-    def __init__(self, nstage, arg=''):
+    def __init__(self, nstage, arg='', name=''):
         self.arg = arg
+        self.name = name
         self.host = ''
         self.address = ''
         self._x = nstage
@@ -29,9 +30,20 @@ class Line(object):
     def y_pos(self):
         return len(self.line)
 
-    def get_line(self, arg_len, host_len, address_len, rtt_digit, space):
-        return '{}{}{}{}{}'.format(self.arg.ljust(arg_len + space, ' '),
-                                   self.host.ljust(host_len + space, ' '),
-                                   self.address.ljust(address_len + space, ' '),
-                                   self.rtt.ljust(rtt_digit + space, ' '),
-                                   self.line)
+    def get_line(self, arg_len, name_len, host_len, address_len, rtt_digit, space):
+
+        if name_len:
+            line = '{}{}{}{}{}{}'.format(self.arg.ljust(arg_len + space, ' '),
+                                         self.name.ljust(name_len + space, ' '),
+                                         self.host.ljust(host_len + space, ' '),
+                                         self.address.ljust(address_len + space, ' '),
+                                         self.rtt.ljust(rtt_digit + space, ' '),
+                                         self.line)
+        else:
+            line = '{}{}{}{}{}'.format(self.arg.ljust(arg_len + space, ' '),
+                                       self.host.ljust(host_len + space, ' '),
+                                       self.address.ljust(address_len + space, ' '),
+                                       self.rtt.ljust(rtt_digit + space, ' '),
+                                       self.line)
+
+        return line
