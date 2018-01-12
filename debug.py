@@ -14,7 +14,7 @@ def set_args():
     parser.add_argument('--space', nargs='?', default=1, type=int, help='Space Size')
     parser.add_argument('-l', '--length', nargs='?', default=5, type=int, help='Result Length')
     parser.add_argument('-d', '--duration', nargs='?', default=sys.maxsize, type=int, help='Duration')
-    parser.add_argument('-c', '--config', type=open, help='Configuration file')
+    parser.add_argument('-c', '--config', type=str, help='Configuration file')
     parser.add_argument('-v', '--version', action='store_true', help='Version')
 
     return parser.parse_args()
