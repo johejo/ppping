@@ -9,11 +9,11 @@ from ppping import PPPing, __VERSION__
 def set_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('args', nargs='*', help='Hosts or Addresses')
-    parser.add_argument('-t', '--timeout', nargs='?', default=1, help='Timeout')
-    parser.add_argument('--scale', nargs='?', default=10, help='RTT Scale')
-    parser.add_argument('--space', nargs='?', default=1, help='Space Size')
-    parser.add_argument('-l', '--length', nargs='?', default=5, help='Result Length')
-    parser.add_argument('-d', '--duration', nargs='?', default=sys.maxsize, help='Duration')
+    parser.add_argument('-t', '--timeout', nargs='?', default=1, type=int, help='Timeout')
+    parser.add_argument('--scale', nargs='?', default=10, type=int, help='RTT Scale')
+    parser.add_argument('--space', nargs='?', default=1, type=int, help='Space Size')
+    parser.add_argument('-l', '--length', nargs='?', default=5, type=int, help='Result Length')
+    parser.add_argument('-d', '--duration', nargs='?', default=sys.maxsize, type=int, help='Duration')
     parser.add_argument('-v', '--version', action='store_true', help='Version')
 
     return parser.parse_args()
