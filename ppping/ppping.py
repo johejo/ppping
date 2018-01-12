@@ -3,6 +3,7 @@ import time
 import curses
 import subprocess
 import socket
+import configparser
 
 from .line import Line
 from .parser import PingResult
@@ -15,14 +16,20 @@ NHEADERS = 3
 
 
 class PPPing(object):
-    def __init__(self, args, timeout=1, rtt_scale=10, result_len=5, space=1, duration=sys.maxsize, mode=curses.A_BOLD):
+    def __init__(self, args, timeout=1, rtt_scale=10, result_len=5, space=1, duration=sys.maxsize, config=None,
+                 mode=curses.A_BOLD):
         self.args = args
         self.result_len = result_len
         self.rtt_scale = rtt_scale
         self.space = space
         self.timeout = timeout
         self.duration = duration
+        self.config = config
+        self.names = ['' for _ in self.args]
         self.mode = mode
+
+        if self.config is not None:
+            self._open_config()
 
     def _scale_char(self, rtt):
         if rtt < self.rtt_scale:
@@ -42,13 +49,22 @@ class PPPing(object):
         else:
             return '█'
 
+    def _open_config(self):
+        config = configparser.ConfigParser()
+        config.read(self.config)
+        d = dict(config.items(config.sections()[config.sections().index('Hosts')]))
+        self.names = list(d.keys())
+        self.args = list(d.values())
+
     def run(self, stdscr):
         begin = time.monotonic()
 
         stdscr.clear()
 
-        lines = {h: Line(i + NHEADERS + 1, arg=h) for i, h in enumerate(self.args)}
+        lines = {a: Line(i + NHEADERS + 1, arg=a, name=name) for i, (a, name) in enumerate(zip(self.args, self.names))}
         host_len = 0
+
+        name_len = max([len(name) for name in self.names])
 
         hostname = socket.gethostname()
 
@@ -80,24 +96,34 @@ class PPPing(object):
 
                 stdscr.addstr(1, self.space, info, self.mode)
 
-                stdscr.addstr(NHEADERS, self.space, '{}{}{}{}{}'.format('args'.ljust(arg_len + self.space),
-                                                                        'host'.ljust(host_len + self.space),
-                                                                        'address'.ljust(address_len + self.space),
-                                                                        'rtt'.ljust(RTT_DIGIT + self.space),
-                                                                        'result'.ljust(self.result_len),
-                                                                        ), self.mode)
+                if not name_len:
+                    stdscr.addstr(NHEADERS, self.space, '{}{}{}{}{}'.format('args'.ljust(arg_len + self.space),
+                                                                            'host'.ljust(host_len + self.space),
+                                                                            'address'.ljust(address_len + self.space),
+                                                                            'rtt'.ljust(RTT_DIGIT + self.space),
+                                                                            'result'.ljust(self.result_len),
+                                                                            ), self.mode)
+                else:
+                    stdscr.addstr(NHEADERS, self.space, '{}{}{}{}{}{}'.format('args'.ljust(arg_len + self.space),
+                                                                              'name'.ljust(name_len + self.space),
+                                                                              'host'.ljust(host_len + self.space),
+                                                                              'address'.ljust(address_len + self.space),
+                                                                              'rtt'.ljust(RTT_DIGIT + self.space),
+                                                                              'result'.ljust(self.result_len),
+                                                                              ), self.mode)
 
                 stdscr.addstr(line.x_pos(), self.space - 1,
-                              '>' + line.get_line(arg_len, host_len, address_len, RTT_DIGIT, self.space),
+                              '>' + line.get_line(arg_len, name_len, host_len, address_len, RTT_DIGIT, self.space),
                               self.mode)
 
                 time.sleep(INTERVAL)
                 stdscr.refresh()
 
                 stdscr.addstr(line.x_pos(), self.space - 1,
-                              ' ' + line.get_line(arg_len, host_len, address_len, RTT_DIGIT, self.space),
+                              ' ' + line.get_line(arg_len, name_len, host_len, address_len, RTT_DIGIT, self.space),
                               self.mode)
 
             for line in lines.values():
                 line.reduce(self.result_len)
+
             time.sleep(1 - INTERVAL)
