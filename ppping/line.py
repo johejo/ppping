@@ -7,12 +7,12 @@ class SetLineError(RuntimeError):
 
 
 class Line(object):
-    def __init__(self, nstage, arg='', name=''):
+    def __init__(self, x, arg='', name=''):
         self.arg = arg
         self.name = name
         self.host = str(None)
         self.address = str(None)
-        self._x = nstage
+        self._x = x
         self.line = ''
         self.rtt = str(0)
 
