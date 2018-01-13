@@ -15,6 +15,7 @@ def set_args():
     parser.add_argument('-l', '--length', nargs='?', default=5, type=int, help='Result Length')
     parser.add_argument('-d', '--duration', nargs='?', default=sys.maxsize, type=int, help='Duration')
     parser.add_argument('-c', '--config', type=str, help='Configuration file')
+    parser.add_argument('-n', '--no-host', action='store_true', help='Do not display hosts.')
     parser.add_argument('-v', '--version', action='store_true', help='Version')
 
     return parser.parse_args()
@@ -31,7 +32,7 @@ def main():
         print('ppping v{}'.format(__VERSION__))
         return
 
-    p = PPPing(args.args, args.timeout, args.scale, args.length, args.space, args.duration, args.config)
+    p = PPPing(args.args, args.timeout, args.scale, args.length, args.space, args.duration, args.config, args.no_host)
 
     try:
         curses.wrapper(p.run)
