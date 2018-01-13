@@ -31,6 +31,7 @@ RTT = 'rtt'
 RESULT = 'result'
 
 HOSTS = 'Hosts'
+FROM = 'From:'
 
 
 class DisplayTitleError(RuntimeError):
@@ -158,7 +159,7 @@ class PPPing(object):
 
         hostname = socket.gethostname()
 
-        info = ' From: {} ({})\n'.format(hostname, socket.gethostbyname(hostname))
+        info = '{}{}{}{}{}({})\n'.format(SPACE, FROM, SPACE, hostname, SPACE, socket.gethostbyname(hostname))
 
         while time.monotonic() - begin < self.duration:
             for a in self.args:
