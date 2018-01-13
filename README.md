@@ -1,7 +1,7 @@
 # ppping
 
 ## Description
-Petty Plain Ping Tool like [deadman](https://github.com/upa/deadman)
+Petty Plain Ping Tool affected [deadman](https://github.com/upa/deadman)
 
 ## Demo
 ![result](https://github.com/johejo/ppping/blob/master/demo.gif)
@@ -12,12 +12,12 @@ Petty Plain Ping Tool like [deadman](https://github.com/upa/deadman)
 $ pip install ppping
 ```
 
-# Usage
+## Usage
 
-## Simple Usage
+### Simple Usage
 
 ```bash
-$ ppping foo.com bar.org WW.XX.YY.ZZ
+$ ppping foo.com bar.org WW.XX.YY.ZZ ...
 ```
 Future help
 
@@ -25,13 +25,13 @@ Future help
 $ ppping --help
 ```
 
-## Config File
+### Config File Usage
 
 ```bash
 $ ppping -c [CONFIG_FILE]
 ```
 
-This is a sample of configuration file
+This is a sample of configuration file.
 
 ```
 [Hosts]
