@@ -8,7 +8,7 @@ except IOError:
 
 setup(
     name='ppping',
-    version='0.1.4',
+    version='0.1.5',
     author='Mitsuo Heijo',
     author_email='mitsuo_h@outlook.com',
     description='Petty Plain Ping',

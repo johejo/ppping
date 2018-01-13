@@ -8,24 +8,48 @@ import configparser
 from .line import Line
 from .parser import PingResult
 
-__VERSION__ = '0.1.4'
+__VERSION__ = 'v0.1.5'
+__NAME__ = 'PPPING'
+
+COMMAND = 'ping'
+COMMAND_OPT = '-c1'
 
 RTT_DIGIT = 6
 INTERVAL = 0.05
-NHEADERS = 3
+N_HEADERS = 2
+
+FAILED = 'X'
+
+ARROW = '>'
+SPACE = ' '
+
+ARG = 'arg'
+NAME = 'name'
+HOST = 'host'
+ADDRESS = 'address'
+RTT = 'rtt'
+RESULT = 'result'
+
+HOSTS = 'Hosts'
+
+
+class DisplayTitleError(RuntimeError):
+    def __str__(self):
+        return 'Could not set display title.'
 
 
 class PPPing(object):
-    def __init__(self, args, timeout=1, rtt_scale=10, result_len=5, space=1, duration=sys.maxsize, config=None,
-                 mode=curses.A_BOLD):
+    def __init__(self, args, timeout=1, rtt_scale=10, res_width=5, space=1, duration=sys.maxsize, config=None,
+                 no_host=False, mode=curses.A_BOLD):
         self.args = args
-        self.result_len = result_len
+        self.res_width = res_width
         self.rtt_scale = rtt_scale
         self.space = space
         self.timeout = timeout
         self.duration = duration
         self.config = config
         self.names = ['' for _ in self.args]
+        self.no_host = no_host
         self.mode = mode
 
         if self.config is not None:
@@ -52,78 +76,114 @@ class PPPing(object):
     def _open_config(self):
         config = configparser.ConfigParser()
         config.read(self.config)
-        d = dict(config.items(config.sections()[config.sections().index('Hosts')]))
+        d = dict(config.items(config.sections()[config.sections().index(HOSTS)]))
         self.names = list(d.keys())
         self.args = list(d.values())
+
+    def _display_title(self, stdscr, info, arg_width, name_width, host_width, addr_width):
+        version = '{} {}'.format(__NAME__, __VERSION__)
+
+        n_columns = sum((bool(arg_width), bool(name_width), bool(not self.no_host),
+                         bool(addr_width), bool(RTT_DIGIT), bool(self.res_width)))
+
+        width = max(sum((arg_width, name_width, host_width, addr_width, RTT_DIGIT,
+                         self.res_width, n_columns * self.space)), len(info)) + len(version)
+
+        stdscr.addstr(0, 0, version.rjust(width // 2), self.mode)
+
+        stdscr.addstr(1, 0, info, self.mode)
+
+        if name_width and self.no_host:
+            stdscr.addstr(N_HEADERS + 1, self.space, '{}{}{}{}{}'.format(ARG.ljust(arg_width + self.space),
+                                                                         NAME.ljust(name_width + self.space),
+                                                                         ADDRESS.ljust(addr_width + self.space),
+                                                                         RTT.ljust(RTT_DIGIT + self.space),
+                                                                         RESULT.ljust(self.res_width),
+                                                                         ), self.mode)
+
+        elif name_width and (not self.no_host):
+            stdscr.addstr(N_HEADERS + 1, self.space, '{}{}{}{}{}{}'.format(ARG.ljust(arg_width + self.space),
+                                                                           NAME.ljust(name_width + self.space),
+                                                                           HOST.ljust(host_width + self.space),
+                                                                           ADDRESS.ljust(addr_width + self.space),
+                                                                           RTT.ljust(RTT_DIGIT + self.space),
+                                                                           RESULT.ljust(self.res_width),
+                                                                           ), self.mode)
+
+        elif (not name_width) and self.no_host:
+            stdscr.addstr(N_HEADERS + 1, self.space, '{}{}{}{}'.format(ARG.ljust(arg_width + self.space),
+                                                                       ADDRESS.ljust(addr_width + self.space),
+                                                                       RTT.ljust(RTT_DIGIT + self.space),
+                                                                       RESULT.ljust(self.res_width),
+                                                                       ), self.mode)
+
+        elif (not name_width) and (not self.no_host):
+            stdscr.addstr(N_HEADERS + 1, self.space, '{}{}{}{}{}'.format(ARG.ljust(arg_width + self.space),
+                                                                         HOST.ljust(host_width + self.space),
+                                                                         ADDRESS.ljust(addr_width + self.space),
+                                                                         RTT.ljust(RTT_DIGIT + self.space),
+                                                                         RESULT.ljust(self.res_width),
+                                                                         ), self.mode)
+        else:
+            raise DisplayTitleError
+
+        return True
+
+    def _display_result(self, stdscr, line, arg_width, name_width, host_width, addr_width):
+
+        stdscr.addstr(line.x_pos(), 0,
+                      line.get_line(ARROW, self.no_host, arg_width, name_width,
+                                    host_width, addr_width, RTT_DIGIT, self.space),
+                      self.mode)
+
+        time.sleep(INTERVAL)
+        stdscr.refresh()
+
+        stdscr.addstr(line.x_pos(), 0,
+                      line.get_line(SPACE, self.no_host, arg_width, name_width,
+                                    host_width, addr_width, RTT_DIGIT, self.space),
+                      self.mode)
+
+        return True
 
     def run(self, stdscr):
         begin = time.monotonic()
 
         stdscr.clear()
 
-        lines = {a: Line(i + NHEADERS + 1, arg=a, name=name) for i, (a, name) in enumerate(zip(self.args, self.names))}
-        host_len = 0
+        lines = {a: Line(i + N_HEADERS + 2, arg=a, name=name) for i, (a, name) in enumerate(zip(self.args, self.names))}
+        host_width = 0
 
-        name_len = max([len(name) for name in self.names])
+        name_width = max([len(name) for name in self.names])
 
         hostname = socket.gethostname()
 
-        info = 'From: {} ({})\n'.format(hostname, socket.gethostbyname(hostname))
+        info = ' From: {} ({})\n'.format(hostname, socket.gethostbyname(hostname))
 
         while time.monotonic() - begin < self.duration:
-            for h in self.args:
-                line = lines[h]
+            for a in self.args:
+                line = lines[a]
+
                 try:
-                    out = subprocess.run(['ping', h, '-c1'], check=True, stdout=subprocess.PIPE,
+                    out = subprocess.run([COMMAND, a, COMMAND_OPT], check=True, stdout=subprocess.PIPE,
                                          stderr=subprocess.DEVNULL, timeout=self.timeout).stdout.decode()
                 except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
-                    sys.stderr.flush()
-                    sys.stdout.flush()
-                    c = 'X'
+                    c = FAILED
                 else:
                     p = PingResult(out)
                     c = self._scale_char(p.time)
                     line.add_info(p)
 
                 line.add_char(c)
-                arg_len = max([len(v.arg) for v in lines.values()])
-                host_len = max(max([len(v.host) for v in lines.values()]), host_len)
-                address_len = max([len(v.address) for v in lines.values()])
+                arg_width = max(max([len(v.arg) for v in lines.values()]), len(ARG))
+                host_width = max(max([len(v.host) for v in lines.values()]), host_width, len(HOST))
+                addr_width = max(max([len(v.address) for v in lines.values()]), len(ADDRESS))
 
-                version = 'PPPING v{}'.format(__VERSION__)
-                n = (arg_len + host_len + address_len + RTT_DIGIT + self.result_len + 5 * self.space)
-                stdscr.addstr(0, 0, version.rjust((n + len(version)) // 2), self.mode)
+                self._display_title(stdscr, info, arg_width, name_width, host_width, addr_width)
 
-                stdscr.addstr(1, self.space, info, self.mode)
-
-                if not name_len:
-                    stdscr.addstr(NHEADERS, self.space, '{}{}{}{}{}'.format('args'.ljust(arg_len + self.space),
-                                                                            'host'.ljust(host_len + self.space),
-                                                                            'address'.ljust(address_len + self.space),
-                                                                            'rtt'.ljust(RTT_DIGIT + self.space),
-                                                                            'result'.ljust(self.result_len),
-                                                                            ), self.mode)
-                else:
-                    stdscr.addstr(NHEADERS, self.space, '{}{}{}{}{}{}'.format('args'.ljust(arg_len + self.space),
-                                                                              'name'.ljust(name_len + self.space),
-                                                                              'host'.ljust(host_len + self.space),
-                                                                              'address'.ljust(address_len + self.space),
-                                                                              'rtt'.ljust(RTT_DIGIT + self.space),
-                                                                              'result'.ljust(self.result_len),
-                                                                              ), self.mode)
-
-                stdscr.addstr(line.x_pos(), self.space - 1,
-                              '>' + line.get_line(arg_len, name_len, host_len, address_len, RTT_DIGIT, self.space),
-                              self.mode)
-
-                time.sleep(INTERVAL)
-                stdscr.refresh()
-
-                stdscr.addstr(line.x_pos(), self.space - 1,
-                              ' ' + line.get_line(arg_len, name_len, host_len, address_len, RTT_DIGIT, self.space),
-                              self.mode)
+                self._display_result(stdscr, line, arg_width, name_width, host_width, addr_width)
 
             for line in lines.values():
-                line.reduce(self.result_len)
+                line.reduce(self.res_width)
 
-            time.sleep(1 - INTERVAL)
+            time.sleep(1 - INTERVAL * len(self.args))
