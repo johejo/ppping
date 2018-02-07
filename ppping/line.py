@@ -7,7 +7,7 @@ class SetLineError(RuntimeError):
 
 
 class Line(object):
-    def __init__(self, x, arg='', name=''):
+    def __init__(self, x, arg='', name='', space=1):
         self.arg = arg
         self.name = name
         self.host = str(None)
@@ -15,6 +15,7 @@ class Line(object):
         self._x = x
         self.line = ''
         self.rtt = str(0)
+        self.space = space
 
     def add_info(self, ping_result):
         self.host = ping_result.hostname
@@ -34,38 +35,38 @@ class Line(object):
     def y_pos(self):
         return len(self.line)
 
-    def get_line(self, head_char, no_host, arg_len, name_len, host_len, address_len, rtt_digit, space):
+    def get_line(self, head_char, no_host, arg_len, name_len, host_len, address_len, rtt_len):
 
         if name_len and no_host:
             line = '{}{}{}{}{}{}'.format(head_char,
-                                         self.arg.ljust(arg_len + space),
-                                         self.name.ljust(name_len + space),
-                                         self.address.ljust(address_len + space),
-                                         self.rtt.ljust(rtt_digit + space),
+                                         self.arg.ljust(arg_len + self.space),
+                                         self.name.ljust(name_len + self.space),
+                                         self.address.ljust(address_len + self.space),
+                                         self.rtt.ljust(rtt_len + self.space),
                                          self.line)
 
         elif name_len and (not no_host):
             line = '{}{}{}{}{}{}{}'.format(head_char,
-                                           self.arg.ljust(arg_len + space),
-                                           self.name.ljust(name_len + space),
-                                           self.host.ljust(host_len + space),
-                                           self.address.ljust(address_len + space),
-                                           self.rtt.ljust(rtt_digit + space),
+                                           self.arg.ljust(arg_len + self.space),
+                                           self.name.ljust(name_len + self.space),
+                                           self.host.ljust(host_len + self.space),
+                                           self.address.ljust(address_len + self.space),
+                                           self.rtt.ljust(rtt_len + self.space),
                                            self.line)
 
         elif (not name_len) and no_host:
             line = '{}{}{}{}{}'.format(head_char,
-                                       self.arg.ljust(arg_len + space),
-                                       self.address.ljust(address_len + space),
-                                       self.rtt.ljust(rtt_digit + space),
+                                       self.arg.ljust(arg_len + self.space),
+                                       self.address.ljust(address_len + self.space),
+                                       self.rtt.ljust(rtt_len + self.space),
                                        self.line)
 
         elif (not name_len) and (not no_host):
             line = '{}{}{}{}{}{}'.format(head_char,
-                                         self.arg.ljust(arg_len + space),
-                                         self.host.ljust(host_len + space),
-                                         self.address.ljust(address_len + space),
-                                         self.rtt.ljust(rtt_digit + space),
+                                         self.arg.ljust(arg_len + self.space),
+                                         self.host.ljust(host_len + self.space),
+                                         self.address.ljust(address_len + self.space),
+                                         self.rtt.ljust(rtt_len + self.space),
                                          self.line)
 
         else:

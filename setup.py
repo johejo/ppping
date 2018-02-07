@@ -1,14 +1,16 @@
 from setuptools import setup, find_packages
 
+from .ppping.ppping import __VERSION__
+
 try:
-    with open('README.md') as f:
+    with open('README.rst') as f:
         readme = f.read()
 except IOError:
     readme = ''
 
 setup(
     name='ppping',
-    version='0.1.5',
+    version=__VERSION__,
     author='Mitsuo Heijo',
     author_email='mitsuo_h@outlook.com',
     description='Petty Plain Ping',
