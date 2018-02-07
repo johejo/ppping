@@ -5,7 +5,7 @@ ppping
     :target: https://pypi.python.org/pypi/ppping
 
 .. image:: https://img.shields.io/github/license/johejo/ppping.svg
-    :target: https://github.com/johejo/ppping
+    :target: https://raw.githubusercontent.com/johejo/ppping/master/LICENSE
 
 .. image:: https://api.codeclimate.com/v1/badges/aea7bbd42d3b4cf5b4ae/maintainability
    :target: https://codeclimate.com/github/johejo/ppping/maintainability
