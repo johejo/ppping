@@ -12,7 +12,8 @@ def set_args():
     parser.add_argument('--space', nargs='?', default=1, type=int, help='space length')
     parser.add_argument('-l', '--length', nargs='?', default=5, type=int, help='result length')
     parser.add_argument('-d', '--duration', nargs='?', default=sys.maxsize, type=float, help='duration time')
-    parser.add_argument('-i', '--interval', nargs='?', default=0.05, type=float, help='interval')
+    parser.add_argument('-i', '--interval', nargs='?', default=0.8, type=float, help='interval')
+    parser.add_argument('--step', nargs='?', default=0.05, type=float, help='step time per host')
     parser.add_argument('-c', '--config', type=str, help='configuration file')
     parser.add_argument('-n', '--no-host', action='store_true', help='do not display hosts')
     parser.add_argument('-v', '--version', action='store_true', help='show version and exit')
@@ -32,7 +33,7 @@ def main():
         return
 
     p = PPPing(args.args, timeout=args.timeout, rtt_scale=args.scale, res_width=args.length, space=args.space,
-               duration=args.duration, interval=args.interval, config=args.config, no_host=args.no_host)
+               duration=args.duration, interval=args.interval, step=args.step, config=args.config, no_host=args.no_host)
 
     try:
         curses.wrapper(p.run)
