@@ -31,8 +31,8 @@ def main():
         print('ppping v{}'.format(__VERSION__))
         return
 
-    p = PPPing(args.args, args.timeout, args.scale, args.length, args.space, args.duration, args.interval,
-               args.config, args.no_host)
+    p = PPPing(args.args, timeout=args.timeout, rtt_scale=args.scale, res_width=args.length, space=args.space,
+               duration=args.duration, interval=args.interval, config=args.config, no_host=args.no_host)
 
     try:
         curses.wrapper(p.run)

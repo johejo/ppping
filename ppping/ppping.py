@@ -37,7 +37,7 @@ class DisplayTitleError(RuntimeError):
 
 
 class PPPing(object):
-    def __init__(self, args, timeout=1, rtt_scale=10, res_width=5, space=1, duration=sys.maxsize, interval=0.05,
+    def __init__(self, args, *, timeout=1, rtt_scale=10, res_width=5, space=1, duration=sys.maxsize, interval=0.05,
                  config=None, no_host=False, mode=curses.A_BOLD):
         self.args = args
         self.res_width = res_width
@@ -57,23 +57,23 @@ class PPPing(object):
 
     def _scale_char(self, rtt):
         if rtt < self.rtt_scale:
-            scale = '▁'
+            char = '▁'
         elif rtt < self.rtt_scale * 2:
-            scale = '▂'
+            char = '▂'
         elif rtt < self.rtt_scale * 3:
-            scale = '▃'
+            char = '▃'
         elif rtt < self.rtt_scale * 4:
-            scale = '▄'
+            char = '▄'
         elif rtt < self.rtt_scale * 5:
-            scale = '▅'
+            char = '▅'
         elif rtt < self.rtt_scale * 6:
-            scale = '▆'
+            char = '▆'
         elif rtt < self.rtt_scale * 7:
-            scale = '▇'
+            char = '▇'
         else:
-            scale = '█'
+            char = '█'
 
-        return scale
+        return char
 
     def _open_config(self):
         config = configparser.ConfigParser()
@@ -85,14 +85,18 @@ class PPPing(object):
     def _ljust(self, target, width):
         return target.ljust(width + self.space)
 
+    def _calc_width(self, info, arg_width, name_width, host_width, addr_width, rtt_width):
+        ncolums = sum((bool(arg_width), bool(name_width), bool(not self.no_host),
+                       bool(addr_width), bool(rtt_width), bool(self.res_width)))
+
+        s = sum((arg_width, name_width, host_width, addr_width, rtt_width, self.res_width, ncolums * self.space))
+
+        return max(s, len(info))
+
     def _display_title(self, info, arg_width, name_width, host_width, addr_width, rtt_width):
         version = '{} v{}'.format(__NAME__, __VERSION__)
 
-        n_columns = sum((bool(arg_width), bool(name_width), bool(not self.no_host),
-                         bool(addr_width), bool(rtt_width), bool(self.res_width)))
-
-        width = max(sum((arg_width, name_width, host_width, addr_width, rtt_width,
-                         self.res_width, n_columns * self.space)), len(info)) + len(version)
+        width = self._calc_width(info, arg_width, name_width, host_width, addr_width, rtt_width) + len(version)
 
         self.stdscr.addstr(0, 0, version.rjust(width // 2), self.mode)
         self.stdscr.addstr(1, self.space - len(SPACE), info, self.mode)
@@ -138,10 +142,9 @@ class PPPing(object):
         self.stdscr.addstr(line.x_pos(), self.space - len(ARROW), string, self.mode)
 
         time.sleep(self.interval)
-        self.stdscr.refresh()
 
-        string = line.get_line(SPACE, self.no_host, arg_width, name_width, host_width, addr_width, rtt_width)
-        self.stdscr.addstr(line.x_pos(), self.space - len(SPACE), string, self.mode)
+        self.stdscr.refresh()
+        self.stdscr.addstr(line.x_pos(), self.space - len(SPACE), string.replace(ARROW, SPACE), self.mode)
 
         return True
 
@@ -149,8 +152,7 @@ class PPPing(object):
         self.stdscr = stdscr
         self.stdscr.clear()
 
-        lines = {a: Line(i + N_HEADERS + 2, a, name, self.space) for i, (a, name) in
-                 enumerate(zip(self.args, self.names))}
+        lines = {a: Line(i + N_HEADERS + 2, a, n, self.space) for i, (a, n) in enumerate(zip(self.args, self.names))}
 
         hostname = socket.gethostname()
         info = '{}{}{}{}{}({})\n'.format(SPACE, FROM, SPACE, hostname, SPACE, socket.gethostbyname(hostname))
