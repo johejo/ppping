@@ -17,7 +17,6 @@ COMMAND_OPT = '-c1'
 N_HEADERS = 2
 
 FAILED = 'X'
-
 ARROW = '>'
 SPACE = ' '
 
@@ -57,21 +56,23 @@ class PPPing(object):
 
     def _scale_char(self, rtt):
         if rtt < self.rtt_scale:
-            return '▁'
+            scale = '▁'
         elif rtt < self.rtt_scale * 2:
-            return '▂'
+            scale = '▂'
         elif rtt < self.rtt_scale * 3:
-            return '▃'
+            scale = '▃'
         elif rtt < self.rtt_scale * 4:
-            return '▄'
+            scale = '▄'
         elif rtt < self.rtt_scale * 5:
-            return '▅'
+            scale = '▅'
         elif rtt < self.rtt_scale * 6:
-            return '▆'
+            scale = '▆'
         elif rtt < self.rtt_scale * 7:
-            return '▇'
+            scale = '▇'
         else:
-            return '█'
+            scale = '█'
+
+        return scale
 
     def _open_config(self):
         config = configparser.ConfigParser()
@@ -97,55 +98,49 @@ class PPPing(object):
         stdscr.addstr(1, self.space - len(SPACE), info, self.mode)
 
         if name_width and self.no_host:
-            stdscr.addstr(N_HEADERS + 1, self.space, '{}{}{}{}{}'.format(self._ljust(ARG, arg_width),
-                                                                         self._ljust(NAME, name_width),
-                                                                         self._ljust(ADDRESS, addr_width),
-                                                                         self._ljust(RTT, rtt_width),
-                                                                         RESULT.ljust(self.res_width),
-                                                                         ), self.mode)
+            string = '{}{}{}{}{}'.format(self._ljust(ARG, arg_width),
+                                         self._ljust(NAME, name_width),
+                                         self._ljust(ADDRESS, addr_width),
+                                         self._ljust(RTT, rtt_width),
+                                         RESULT.ljust(self.res_width))
 
         elif name_width and (not self.no_host):
-            stdscr.addstr(N_HEADERS + 1, self.space, '{}{}{}{}{}{}'.format(self._ljust(ARG, arg_width),
-                                                                           self._ljust(NAME, name_width),
-                                                                           self._ljust(HOST, host_width),
-                                                                           self._ljust(ADDRESS, addr_width),
-                                                                           self._ljust(RTT, rtt_width),
-                                                                           RESULT.ljust(self.res_width),
-                                                                           ), self.mode)
+            string = '{}{}{}{}{}{}'.format(self._ljust(ARG, arg_width),
+                                           self._ljust(NAME, name_width),
+                                           self._ljust(HOST, host_width),
+                                           self._ljust(ADDRESS, addr_width),
+                                           self._ljust(RTT, rtt_width),
+                                           RESULT.ljust(self.res_width))
 
         elif (not name_width) and self.no_host:
-            stdscr.addstr(N_HEADERS + 1, self.space, '{}{}{}{}'.format(self._ljust(ARG, arg_width),
-                                                                       self._ljust(ADDRESS, addr_width),
-                                                                       self._ljust(RTT, rtt_width),
-                                                                       RESULT.ljust(self.res_width),
-                                                                       ), self.mode)
+            string = '{}{}{}{}'.format(self._ljust(ARG, arg_width),
+                                       self._ljust(ADDRESS, addr_width),
+                                       self._ljust(RTT, rtt_width),
+                                       RESULT.ljust(self.res_width))
 
         elif (not name_width) and (not self.no_host):
-            stdscr.addstr(N_HEADERS + 1, self.space, '{}{}{}{}{}'.format(self._ljust(ARG, arg_width),
-                                                                         self._ljust(HOST, host_width),
-                                                                         self._ljust(ADDRESS, addr_width),
-                                                                         self._ljust(RTT, rtt_width),
-                                                                         RESULT.ljust(self.res_width),
-                                                                         ), self.mode)
+            string = '{}{}{}{}{}'.format(self._ljust(ARG, arg_width),
+                                         self._ljust(HOST, host_width),
+                                         self._ljust(ADDRESS, addr_width),
+                                         self._ljust(RTT, rtt_width),
+                                         RESULT.ljust(self.res_width))
+
         else:
             raise DisplayTitleError
 
+        stdscr.addstr(N_HEADERS + 1, self.space, string, self.mode)
         return True
 
     def _display_result(self, stdscr, line, arg_width, name_width, host_width, addr_width, rtt_width):
 
-        stdscr.addstr(line.x_pos(), self.space - len(ARROW),
-                      line.get_line(ARROW, self.no_host, arg_width, name_width,
-                                    host_width, addr_width, rtt_width),
-                      self.mode)
+        string = line.get_line(ARROW, self.no_host, arg_width, name_width, host_width, addr_width, rtt_width)
+        stdscr.addstr(line.x_pos(), self.space - len(ARROW), string, self.mode)
 
         time.sleep(self.interval)
         stdscr.refresh()
 
-        stdscr.addstr(line.x_pos(), self.space - len(SPACE),
-                      line.get_line(SPACE, self.no_host, arg_width, name_width,
-                                    host_width, addr_width, rtt_width),
-                      self.mode)
+        string = line.get_line(SPACE, self.no_host, arg_width, name_width, host_width, addr_width, rtt_width)
+        stdscr.addstr(line.x_pos(), self.space - len(SPACE), string, self.mode)
 
         return True
 
