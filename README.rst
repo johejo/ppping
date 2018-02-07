@@ -1,10 +1,8 @@
 ppping
 ======
 
-.. image:: https://img.shields.io/pypi/v/ppping.svg   :target:
-
-.. image:: https://img.shields.io/github/license/johejo/ppping.svg   :target:
-
+.. image:: https://img.shields.io/pypi/v/ppping.svg  :target: https://pypi.org/pypi/ppping
+.. image:: https://img.shields.io/github/license/johejo/ppping.svg   :target: https://github.com/johejo/ppping
 .. image:: https://api.codeclimate.com/v1/badges/aea7bbd42d3b4cf5b4ae/maintainability
    :target: https://codeclimate.com/github/johejo/ppping/maintainability
    :alt: Maintainability
