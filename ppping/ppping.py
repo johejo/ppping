@@ -37,8 +37,8 @@ class DisplayTitleError(RuntimeError):
 
 
 class PPPing(object):
-    def __init__(self, args, timeout=1, rtt_scale=10, res_width=5, space=1, duration=sys.maxsize, config=None,
-                 no_host=False, interval=0.05, mode=curses.A_BOLD):
+    def __init__(self, args, timeout=1, rtt_scale=10, res_width=5, space=1, duration=sys.maxsize, interval=0.05,
+                 config=None, no_host=False, mode=curses.A_BOLD):
         self.args = args
         self.res_width = res_width
         self.rtt_scale = rtt_scale
@@ -50,6 +50,7 @@ class PPPing(object):
         self.no_host = no_host
         self.interval = interval
         self.mode = mode
+        self.stdscr = None
 
         if self.config is not None:
             self._open_config()
@@ -84,7 +85,7 @@ class PPPing(object):
     def _ljust(self, target, width):
         return target.ljust(width + self.space)
 
-    def _display_title(self, stdscr, info, arg_width, name_width, host_width, addr_width, rtt_width):
+    def _display_title(self, info, arg_width, name_width, host_width, addr_width, rtt_width):
         version = '{} v{}'.format(__NAME__, __VERSION__)
 
         n_columns = sum((bool(arg_width), bool(name_width), bool(not self.no_host),
@@ -93,9 +94,8 @@ class PPPing(object):
         width = max(sum((arg_width, name_width, host_width, addr_width, rtt_width,
                          self.res_width, n_columns * self.space)), len(info)) + len(version)
 
-        stdscr.addstr(0, 0, version.rjust(width // 2), self.mode)
-
-        stdscr.addstr(1, self.space - len(SPACE), info, self.mode)
+        self.stdscr.addstr(0, 0, version.rjust(width // 2), self.mode)
+        self.stdscr.addstr(1, self.space - len(SPACE), info, self.mode)
 
         if name_width and self.no_host:
             string = '{}{}{}{}{}'.format(self._ljust(ARG, arg_width),
@@ -128,45 +128,43 @@ class PPPing(object):
         else:
             raise DisplayTitleError
 
-        stdscr.addstr(N_HEADERS + 1, self.space, string, self.mode)
+        self.stdscr.addstr(N_HEADERS + 1, self.space, string, self.mode)
+
         return True
 
-    def _display_result(self, stdscr, line, arg_width, name_width, host_width, addr_width, rtt_width):
+    def _display_result(self, line, arg_width, name_width, host_width, addr_width, rtt_width):
 
         string = line.get_line(ARROW, self.no_host, arg_width, name_width, host_width, addr_width, rtt_width)
-        stdscr.addstr(line.x_pos(), self.space - len(ARROW), string, self.mode)
+        self.stdscr.addstr(line.x_pos(), self.space - len(ARROW), string, self.mode)
 
         time.sleep(self.interval)
-        stdscr.refresh()
+        self.stdscr.refresh()
 
         string = line.get_line(SPACE, self.no_host, arg_width, name_width, host_width, addr_width, rtt_width)
-        stdscr.addstr(line.x_pos(), self.space - len(SPACE), string, self.mode)
+        self.stdscr.addstr(line.x_pos(), self.space - len(SPACE), string, self.mode)
 
         return True
 
     def run(self, stdscr):
-        begin = time.monotonic()
-
-        stdscr.clear()
+        self.stdscr = stdscr
+        self.stdscr.clear()
 
         lines = {a: Line(i + N_HEADERS + 2, a, name, self.space) for i, (a, name) in
                  enumerate(zip(self.args, self.names))}
 
-        name_width = max([len(name) for name in self.names])
-
         hostname = socket.gethostname()
-
         info = '{}{}{}{}{}({})\n'.format(SPACE, FROM, SPACE, hostname, SPACE, socket.gethostbyname(hostname))
 
         arg_width = len(ARG)
         host_width = len(HOST)
         addr_width = len(ADDRESS)
         rtt_width = len(RTT)
+        name_width = max([len(name) for name in self.names])
+
+        begin = time.monotonic()
 
         while time.monotonic() - begin < self.duration:
-            for a in self.args:
-                line = lines[a]
-
+            for a, line in lines.items():
                 try:
                     out = subprocess.run([COMMAND, a, COMMAND_OPT], check=True, stdout=subprocess.PIPE,
                                          stderr=subprocess.DEVNULL, timeout=self.timeout).stdout.decode()
@@ -178,14 +176,14 @@ class PPPing(object):
                     line.add_info(p)
 
                 line.add_char(c)
+
                 arg_width = max(max([len(v.arg) for v in lines.values()]), arg_width)
                 host_width = max(max([len(v.host) for v in lines.values()]), host_width)
                 addr_width = max(max([len(v.address) for v in lines.values()]), addr_width)
                 rtt_width = max(max([len(v.rtt) for v in lines.values()]), rtt_width)
 
-                self._display_title(stdscr, info, arg_width, name_width, host_width, addr_width, rtt_width)
-
-                self._display_result(stdscr, line, arg_width, name_width, host_width, addr_width, rtt_width)
+                self._display_title(info, arg_width, name_width, host_width, addr_width, rtt_width)
+                self._display_result(line, arg_width, name_width, host_width, addr_width, rtt_width)
 
             for line in lines.values():
                 line.reduce(self.res_width)
