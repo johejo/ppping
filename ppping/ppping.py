@@ -37,14 +37,15 @@ class DisplayTitleError(RuntimeError):
 
 
 class PPPing(object):
-    def __init__(self, args, *, timeout=1, rtt_scale=10, res_width=5, space=1, duration=sys.maxsize, interval=0.05,
-                 config=None, no_host=False, mode=curses.A_BOLD):
+    def __init__(self, args, *, timeout=1, rtt_scale=10, res_width=5, space=1, duration=sys.maxsize, interval=0.8,
+                 step=0.05, config=None, no_host=False, mode=curses.A_BOLD):
         self.args = args
         self.res_width = res_width
         self.rtt_scale = rtt_scale
         self.space = space
         self.timeout = timeout
         self.duration = duration
+        self.step = step
         self.config = config
         self.names = ['' for _ in self.args]
         self.no_host = no_host
@@ -132,7 +133,7 @@ class PPPing(object):
         string = line.get_line(ARROW, self.no_host, arg_width, name_width, host_width, addr_width, rtt_width)
         self.stdscr.addstr(line.x_pos(), self.space - len(ARROW), string, self.mode)
 
-        time.sleep(self.interval)
+        time.sleep(self.step)
 
         self.stdscr.refresh()
         self.stdscr.addstr(line.x_pos(), self.space - len(SPACE), string.replace(ARROW, SPACE), self.mode)
@@ -181,4 +182,4 @@ class PPPing(object):
             for line in lines.values():
                 line.reduce(self.res_width)
 
-            time.sleep(1 - self.interval * len(self.args))
+            time.sleep(self.interval)

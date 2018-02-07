@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-from .ppping.ppping import __VERSION__
+from ppping.ppping import __VERSION__
 
 try:
     with open('README.rst') as f:
@@ -25,12 +25,13 @@ setup(
     keyword=['ping-python', 'ping'],
     classifiers=[
         'Development Status :: 4 - Beta',
-        'Environment :: Console',
+        'Environment :: Console :: Curses',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: MacOS :: MacOS X',
         'Operating System :: POSIX',
-        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: 3.6',
+        'Topic :: System :: Networking :: Monitoring',
     ]
 )
