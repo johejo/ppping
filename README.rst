@@ -24,8 +24,6 @@ Demo
 .. figure:: https://github.com/johejo/ppping/blob/master/demo.gif
    :alt: result
 
-   result
-
 Install
 -------
 
