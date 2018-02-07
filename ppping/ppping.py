@@ -101,33 +101,24 @@ class PPPing(object):
         self.stdscr.addstr(0, 0, version.rjust(width // 2), self.mode)
         self.stdscr.addstr(1, self.space - len(SPACE), info, self.mode)
 
+        arg = self._ljust(ARG, arg_width)
+        name = self._ljust(NAME, name_width)
+        host = self._ljust(HOST, host_width)
+        addr = self._ljust(ADDRESS, addr_width)
+        rtt = self._ljust(RTT, rtt_width)
+        res = RESULT.ljust(self.res_width)
+
         if name_width and self.no_host:
-            string = '{}{}{}{}{}'.format(self._ljust(ARG, arg_width),
-                                         self._ljust(NAME, name_width),
-                                         self._ljust(ADDRESS, addr_width),
-                                         self._ljust(RTT, rtt_width),
-                                         RESULT.ljust(self.res_width))
+            string = '{}{}{}{}{}'.format(arg, name, addr, rtt, res)
 
         elif name_width and (not self.no_host):
-            string = '{}{}{}{}{}{}'.format(self._ljust(ARG, arg_width),
-                                           self._ljust(NAME, name_width),
-                                           self._ljust(HOST, host_width),
-                                           self._ljust(ADDRESS, addr_width),
-                                           self._ljust(RTT, rtt_width),
-                                           RESULT.ljust(self.res_width))
+            string = '{}{}{}{}{}{}'.format(arg, name, host, addr, rtt, res)
 
         elif (not name_width) and self.no_host:
-            string = '{}{}{}{}'.format(self._ljust(ARG, arg_width),
-                                       self._ljust(ADDRESS, addr_width),
-                                       self._ljust(RTT, rtt_width),
-                                       RESULT.ljust(self.res_width))
+            string = '{}{}{}{}'.format(arg, addr, rtt, res)
 
         elif (not name_width) and (not self.no_host):
-            string = '{}{}{}{}{}'.format(self._ljust(ARG, arg_width),
-                                         self._ljust(HOST, host_width),
-                                         self._ljust(ADDRESS, addr_width),
-                                         self._ljust(RTT, rtt_width),
-                                         RESULT.ljust(self.res_width))
+            string = '{}{}{}{}{}'.format(arg, host, addr, rtt, res)
 
         else:
             raise DisplayTitleError

@@ -37,37 +37,23 @@ class Line(object):
 
     def get_line(self, head_char, no_host, arg_len, name_len, host_len, address_len, rtt_len):
 
+        arg = self.arg.ljust(arg_len + self.space)
+        name = self.name.ljust(name_len + self.space)
+        host = self.host.ljust(host_len + self.space)
+        addr = self.address.ljust(address_len + self.space)
+        rtt = self.rtt.ljust(rtt_len + self.space)
+
         if name_len and no_host:
-            line = '{}{}{}{}{}{}'.format(head_char,
-                                         self.arg.ljust(arg_len + self.space),
-                                         self.name.ljust(name_len + self.space),
-                                         self.address.ljust(address_len + self.space),
-                                         self.rtt.ljust(rtt_len + self.space),
-                                         self.line)
+            line = '{}{}{}{}{}{}'.format(head_char, arg, name, addr, rtt, self.line)
 
         elif name_len and (not no_host):
-            line = '{}{}{}{}{}{}{}'.format(head_char,
-                                           self.arg.ljust(arg_len + self.space),
-                                           self.name.ljust(name_len + self.space),
-                                           self.host.ljust(host_len + self.space),
-                                           self.address.ljust(address_len + self.space),
-                                           self.rtt.ljust(rtt_len + self.space),
-                                           self.line)
+            line = '{}{}{}{}{}{}{}'.format(head_char, arg, name, host, addr, rtt, self.line)
 
         elif (not name_len) and no_host:
-            line = '{}{}{}{}{}'.format(head_char,
-                                       self.arg.ljust(arg_len + self.space),
-                                       self.address.ljust(address_len + self.space),
-                                       self.rtt.ljust(rtt_len + self.space),
-                                       self.line)
+            line = '{}{}{}{}{}'.format(head_char, arg, addr, rtt, self.line)
 
         elif (not name_len) and (not no_host):
-            line = '{}{}{}{}{}{}'.format(head_char,
-                                         self.arg.ljust(arg_len + self.space),
-                                         self.host.ljust(host_len + self.space),
-                                         self.address.ljust(address_len + self.space),
-                                         self.rtt.ljust(rtt_len + self.space),
-                                         self.line)
+            line = '{}{}{}{}{}{}'.format(head_char, arg, host, addr, rtt, self.line)
 
         else:
             raise SetLineError
