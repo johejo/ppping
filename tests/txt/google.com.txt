@@ -1,0 +1,6 @@
+PING google.com (172.217.27.174) 56(84) bytes of data.
+64 bytes from kix05s07-in-f174.1e100.net (172.217.27.174): icmp_seq=1 ttl=54 time=6.19 ms
+
+--- google.com ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 6.196/6.196/6.196/0.000 ms

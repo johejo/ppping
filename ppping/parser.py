@@ -1,6 +1,5 @@
 class PingParserError(RuntimeError):
-    def __str__(self):
-        return 'Could not parse ping message.'
+    pass
 
 
 class PingResult(object):

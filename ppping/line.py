@@ -2,8 +2,7 @@ DECIMAL_PLACES = 2
 
 
 class SetLineError(RuntimeError):
-    def __str__(self):
-        return 'Could not set line'
+    pass
 
 
 class Line(object):
@@ -52,10 +51,7 @@ class Line(object):
         elif (not name_len) and no_host:
             line = '{}{}{}{}{}'.format(head_char, arg, addr, rtt, self.line)
 
-        elif (not name_len) and (not no_host):
-            line = '{}{}{}{}{}{}'.format(head_char, arg, host, addr, rtt, self.line)
-
         else:
-            raise SetLineError
+            line = '{}{}{}{}{}{}'.format(head_char, arg, host, addr, rtt, self.line)
 
         return line
