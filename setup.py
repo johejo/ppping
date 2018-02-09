@@ -1,6 +1,9 @@
 from setuptools import setup, find_packages
 
-from ppping.ppping import __VERSION__
+from ppping import (
+    __url__, __title__, __license__, __description__, __author_email__,
+    __author__, __version__,
+)
 
 try:
     with open('README.rst') as f:
@@ -8,16 +11,20 @@ try:
 except IOError:
     readme = ''
 
+tests_requirements = [
+    'pytest-cov', 'pytest'
+]
+
 setup(
-    name='ppping',
-    version=__VERSION__,
-    author='Mitsuo Heijo',
-    author_email='mitsuo_h@outlook.com',
-    description='Petty Plain Ping',
+    name=__title__,
+    version=__version__,
+    author=__author__,
+    author_email=__author_email__,
+    description=__description__,
     long_description=readme,
     packages=find_packages(),
-    license='MIT',
-    url='http://github.com/johejo/ppping',
+    license=__license__,
+    url=__url__,
     py_modules=['ppping'],
     entry_points={
         'console_scripts': 'ppping = ppping.script:main'
@@ -33,5 +40,6 @@ setup(
         'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: 3.6',
         'Topic :: System :: Networking :: Monitoring',
-    ]
+    ],
+    tests_requires=tests_requirements,
 )

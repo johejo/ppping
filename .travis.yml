@@ -1,0 +1,17 @@
+language: python
+
+python:
+  - "3.5"
+  - "3.6"
+  - "3.7-dev"
+
+cache: pip
+
+install:
+  - "pip install . pytest pytest-cov flake8"
+
+before_script:
+  - "flake8 tests ppping"
+
+script:
+  - "pytest --cov tests/"

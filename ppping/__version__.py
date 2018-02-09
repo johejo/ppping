@@ -1,0 +1,8 @@
+__title__ = 'ppping'
+__description__ = 'Petty Plain Ping'
+__url__ = 'http://github.com/johejo/ppping'
+__version__ = '0.1.7'
+__author__ = 'Mitsuo Heijo'
+__author_email__ = 'mitsuo_h@outlook.com'
+__license__ = 'MIT'
+__copyright__ = 'Copyright 2018 Mitsuo Heijo'
