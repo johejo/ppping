@@ -1,5 +1,3 @@
-sudo: false
-
 language: python
 
 python:
@@ -8,6 +6,12 @@ python:
   - "3.7-dev"
 
 cache: pip
+
+addons:
+  apt:
+    packages:
+      - iputils-ping
+      - net-tools
 
 install:
   - "pip install . pytest pytest-cov flake8"

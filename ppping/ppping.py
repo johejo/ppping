@@ -174,12 +174,12 @@ class PPPing(object):
                                          stdout=subprocess.PIPE,
                                          stderr=subprocess.DEVNULL,
                                          timeout=self.timeout).stdout.decode()
+                except (TimeoutExpired, CalledProcessError):
+                    c = FAILED
+                else:
                     p = PingResult(out)
                     c = self.scale_char(p.time)
                     line.add_info(p)
-
-                except (TimeoutExpired, CalledProcessError):
-                    c = FAILED
 
                 line.add_char(c)
 
