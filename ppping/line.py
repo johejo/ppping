@@ -1,10 +1,6 @@
 DECIMAL_PLACES = 2
 
 
-class SetLineError(RuntimeError):
-    pass
-
-
 class Line(object):
     def __init__(self, x, arg='', name='', space=1):
         self.arg = arg
@@ -34,7 +30,8 @@ class Line(object):
     def y_pos(self):
         return len(self.line)
 
-    def get_line(self, head_char, no_host, arg_len, name_len, host_len, address_len, rtt_len):
+    def get_line(self, head_char, no_host,
+                 arg_len, name_len, host_len, address_len, rtt_len):
 
         arg = self.arg.ljust(arg_len + self.space)
         name = self.name.ljust(name_len + self.space)
@@ -43,15 +40,19 @@ class Line(object):
         rtt = self.rtt.ljust(rtt_len + self.space)
 
         if name_len and no_host:
-            line = '{}{}{}{}{}{}'.format(head_char, arg, name, addr, rtt, self.line)
+            line = '{}{}{}{}{}{}'.format(head_char, arg,
+                                         name, addr, rtt, self.line)
 
         elif name_len and (not no_host):
-            line = '{}{}{}{}{}{}{}'.format(head_char, arg, name, host, addr, rtt, self.line)
+            line = '{}{}{}{}{}{}{}'.format(head_char, arg,
+                                           name, host, addr, rtt, self.line)
 
         elif (not name_len) and no_host:
-            line = '{}{}{}{}{}'.format(head_char, arg, addr, rtt, self.line)
+            line = '{}{}{}{}{}'.format(head_char, arg,
+                                       addr, rtt, self.line)
 
         else:
-            line = '{}{}{}{}{}{}'.format(head_char, arg, host, addr, rtt, self.line)
+            line = '{}{}{}{}{}{}'.format(head_char, arg,
+                                         host, addr, rtt, self.line)
 
         return line

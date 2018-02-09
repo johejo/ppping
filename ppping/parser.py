@@ -5,7 +5,7 @@ class PingParserError(RuntimeError):
 class PingResult(object):
     def __init__(self, ping_message):
         self.raw = ping_message
-        if type(self.raw) is not str:
+        if type(self.raw) is bytes:
             self.raw = self.raw.decode()
 
         try:
@@ -24,9 +24,5 @@ class PingResult(object):
             self.ttl = int(sp[-3].split('=')[-1])
             self.time = float(sp[-2].split('=')[-1])
 
-        except ValueError:
+        except (ValueError, IndexError):
             raise PingParserError
-
-    def __str__(self):
-        return 'host={}, address={}, icmp_sec={}, ttl={}, time={}'.\
-            format(self.hostname, self.address, self.icmp_seq, self.ttl, self.time)

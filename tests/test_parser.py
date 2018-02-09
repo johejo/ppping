@@ -3,10 +3,10 @@ import glob
 
 from ppping.parser import PingResult, PingParserError
 
-TEST_DIR = 'tests/'
+TXT_DIR = 'tests/txt/'
 
 
-class ExpectedResult(object):
+class DummyResult(object):
     def __init__(self, address, hostname, icmp_seq, ttl, time):
         self.address = address
         self.hostname = hostname
@@ -14,27 +14,28 @@ class ExpectedResult(object):
         self.ttl = ttl
         self.time = time
 
-    def __str__(self):
-        return 'host={}, address={}, icmp_sec={}, ttl={}, time={}'. \
-            format(self.hostname, self.address, self.icmp_seq, self.ttl, self.time)
-
 
 class TestPingResult(object):
     def test_parser(self):
 
         expected = {
-            'localhost': ExpectedResult(address='::1', hostname='localhost', icmp_seq=1, ttl=64, time=0.063),
-            '8.8.8.8': ExpectedResult(address='8.8.8.8', hostname='8.8.8.8', icmp_seq=1, ttl=57, time=6.21),
-            'google.com': ExpectedResult(address='172.217.27.174', hostname='kix05s07-in-f174.1e100.net',
-                                         icmp_seq=1, ttl=54, time=6.19),
+            'localhost': DummyResult(address='::1', hostname='localhost',
+                                     icmp_seq=1, ttl=64, time=0.063),
+            '8.8.8.8': DummyResult(address='8.8.8.8', hostname='8.8.8.8',
+                                   icmp_seq=1, ttl=57, time=6.21),
+            'google.com': DummyResult(address='172.217.27.174',
+                                      hostname='kix05s07-in-f174.1e100.net',
+                                      icmp_seq=1, ttl=54, time=6.19),
         }
 
-        test_messages = [open(TEST_DIR + 'txt/{}.txt'.format(host), 'rt').read() for host in expected.keys()]
-        test_message_raw = [m.encode() for m in test_messages]
+        messages = [open(TXT_DIR + '{}.txt'.format(host), 'rt').read()
+                    for host in expected.keys()]
 
-        for test_message, raw, e in zip(test_messages, test_message_raw, expected.values()):
-            result = PingResult(test_message)
-            assert result.raw == test_message
+        message_raw = [m.encode() for m in messages]
+
+        for m, raw, e in zip(messages, message_raw, expected.values()):
+            result = PingResult(m)
+            assert result.raw == m
             assert result.address == e.address
             assert result.hostname == e.hostname
             assert result.icmp_seq == e.icmp_seq
@@ -42,18 +43,17 @@ class TestPingResult(object):
             assert result.time == e.time
 
             result = PingResult(raw)
-            assert result.raw == test_message
+            assert result.raw == m
             assert result.address == e.address
             assert result.hostname == e.hostname
             assert result.icmp_seq == e.icmp_seq
             assert result.ttl == e.ttl
             assert result.time == e.time
 
-            assert str(result) == str(e)
-
     def test_parser_error(self):
 
-        errors = [open(g, 'rt').read() for g in glob.glob(TEST_DIR + 'error*.txt')]
+        errors = [open(g, 'rt').read()
+                  for g in glob.glob(TXT_DIR + 'error*.txt')]
 
         for e in errors:
             with pytest.raises(PingParserError):
