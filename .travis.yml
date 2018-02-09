@@ -20,4 +20,5 @@ script:
   - "py.test --cov ppping tests/"
 
 after_script:
+  - "coverage xml"
   - "./cc-test-reporter after-build"
