@@ -1,6 +1,9 @@
 ppping
 ======
 
+.. image:: https://travis-ci.org/johejo/ppping.svg?branch=master
+    :target: https://travis-ci.org/johejo/ppping
+
 .. image:: https://img.shields.io/pypi/v/ppping.svg
     :target: https://pypi.python.org/pypi/ppping
 
