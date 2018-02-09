@@ -11,7 +11,7 @@ install:
   - "pip install . pytest pytest-cov flake8"
 
 before_script:
-  - "flake8 tests ppping"
+  - "flake8 --ignoreF401 tests ppping"
 
 script:
   - "pytest --cov tests/"
