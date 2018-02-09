@@ -46,7 +46,3 @@ def main():
         curses.wrapper(p.run)
     except KeyboardInterrupt:
         exit()
-
-
-if __name__ == '__main__':
-    main()
