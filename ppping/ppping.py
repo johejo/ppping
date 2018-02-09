@@ -2,9 +2,10 @@ import sys
 import time
 import os
 import curses
-import subprocess
 import socket
 import configparser
+import subprocess
+from subprocess import TimeoutExpired, CalledProcessError
 
 from .line import Line
 from .parser import PingResult
@@ -173,13 +174,12 @@ class PPPing(object):
                                          stdout=subprocess.PIPE,
                                          stderr=subprocess.DEVNULL,
                                          timeout=self.timeout).stdout.decode()
-                except (subprocess.CalledProcessError,
-                        subprocess.TimeoutExpired):
-                    c = FAILED
-                else:
                     p = PingResult(out)
                     c = self.scale_char(p.time)
                     line.add_info(p)
+
+                except (TimeoutExpired, CalledProcessError):
+                    c = FAILED
 
                 line.add_char(c)
 
