@@ -14,6 +14,11 @@ ppping
    :target: https://codeclimate.com/github/johejo/ppping/maintainability
    :alt: Maintainability
 
+.. image:: https://api.codeclimate.com/v1/badges/aea7bbd42d3b4cf5b4ae/test_coverage
+   :target: https://codeclimate.com/github/johejo/ppping/test_coverage
+   :alt: Test Coverage
+
+
 
 Description
 -----------
