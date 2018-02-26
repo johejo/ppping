@@ -44,5 +44,5 @@ def main():
 
     try:
         curses.wrapper(p.run)
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, ProcessLookupError):
         exit()
