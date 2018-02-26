@@ -1,4 +1,4 @@
-class PingParserError(RuntimeError):
+class PingParserError(Exception):
     pass
 
 

@@ -1,30 +1,31 @@
 from setuptools import setup, find_packages
+import os
+from codecs import open
 
-from ppping import (
-    __url__, __title__, __license__, __description__, __author_email__,
-    __author__, __version__,
-)
+with open('README.rst', 'r', 'utf-8') as f:
+    readme = f.read()
 
-try:
-    with open('README.rst') as f:
-        readme = f.read()
-except IOError:
-    readme = ''
+here = os.path.abspath(os.path.dirname(__file__))
+
+about = {}
+with open(os.path.join(here, 'ppping', '__version__.py'),
+          'r', 'utf-8') as f:
+    exec(f.read(), about)
 
 tests_requirements = [
     'pytest-cov', 'pytest'
 ]
 
 setup(
-    name=__title__,
-    version=__version__,
-    author=__author__,
-    author_email=__author_email__,
-    description=__description__,
+     name=about['__title__'],
+    version=about['__version__'],
+    author=about['__author__'],
+    author_email=about['__author_email__'],
+    description=about['__description__'],
     long_description=readme,
     packages=find_packages(),
-    license=__license__,
-    url=__url__,
+    license=about['__license__'],
+    url=about['__url__'],
     py_modules=['ppping'],
     entry_points={
         'console_scripts': 'ppping = ppping.script:main'
