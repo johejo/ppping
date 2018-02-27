@@ -23,7 +23,7 @@ ppping
 Description
 -----------
 
-Petty Plain Ping Tool affected
+ping monitoring tool written in Python affected
 `deadman <https://github.com/upa/deadman>`__
 
 Demo
@@ -32,12 +32,27 @@ Demo
 .. figure:: https://github.com/johejo/ppping/blob/master/demo.gif
    :alt: result
 
+Environment
+-----------
+
+List of supported environments
+
+- Linux distribution such as Ubuntu, CentOS, ArchLinux etc.
+- Windows Subsystem for Linux
+- macOS
+
+Requirements
+------------
+
+- Python3
+
 Install
 -------
 
 .. code:: bash
 
     $ pip install ppping
+
 
 Usage
 -----
