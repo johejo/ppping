@@ -1,5 +1,5 @@
 __title__ = 'ppping'
-__description__ = 'Petty Plain Ping'
+__description__ = 'ping monitoring tool written in Python'
 __url__ = 'http://github.com/johejo/ppping'
 __version__ = '0.1.8'
 __author__ = 'Mitsuo Heijo'
