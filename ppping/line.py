@@ -30,29 +30,25 @@ class Line(object):
     def y_pos(self):
         return len(self.line)
 
+    def _ljust(self, target, length):
+        return target.ljust(length + self.space)
+
     def get_line(self, head_char, no_host,
                  arg_len, name_len, host_len, address_len, rtt_len):
 
-        arg = self.arg.ljust(arg_len + self.space)
-        name = self.name.ljust(name_len + self.space)
-        host = self.host.ljust(host_len + self.space)
-        addr = self.address.ljust(address_len + self.space)
-        rtt = self.rtt.ljust(rtt_len + self.space)
+        arg = self._ljust(self.arg, arg_len)
+        name = self._ljust(self.name, name_len)
+        host = self._ljust(self.host, host_len)
+        addr = self._ljust(self.address, address_len)
+        rtt = self._ljust(self.rtt, rtt_len)
 
         if name_len and no_host:
-            line = '{}{}{}{}{}{}'.format(head_char, arg,
-                                         name, addr, rtt, self.line)
-
+            line = head_char + arg + name + addr + rtt + self.line
         elif name_len and (not no_host):
-            line = '{}{}{}{}{}{}{}'.format(head_char, arg,
-                                           name, host, addr, rtt, self.line)
-
+            line = head_char + arg + name + host + addr + rtt + self.line
         elif (not name_len) and no_host:
-            line = '{}{}{}{}{}'.format(head_char, arg,
-                                       addr, rtt, self.line)
-
+            line = head_char + arg + addr + rtt + self.line
         else:
-            line = '{}{}{}{}{}{}'.format(head_char, arg,
-                                         host, addr, rtt, self.line)
+            line = head_char + arg + host + addr + rtt + self.line
 
         return line

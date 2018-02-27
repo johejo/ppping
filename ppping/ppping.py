@@ -5,12 +5,10 @@ import curses
 import socket
 import configparser
 import subprocess
-from subprocess import TimeoutExpired, CalledProcessError
 
 from .line import Line
 from .parser import PingResult
 from .__version__ import __version__, __title__
-
 
 COMMAND = 'ping'
 COMMAND_OPT = '-c1'
@@ -117,20 +115,15 @@ class PPPing(object):
         res = RESULT.ljust(self.res_width)
 
         if name_width and self.no_host:
-            string = '{}{}{}{}{}'.format(arg, name, addr, rtt, res)
-
+            string = arg + name + addr + rtt + res
         elif name_width and (not self.no_host):
-            string = '{}{}{}{}{}{}'.format(arg, name, host, addr, rtt, res)
-
+            string = arg + name + host + addr + rtt + res
         elif (not name_width) and self.no_host:
-            string = '{}{}{}{}'.format(arg, addr, rtt, res)
-
+            string = arg + addr + rtt + res
         else:
-            string = '{}{}{}{}{}'.format(arg, host, addr, rtt, res)
+            string = arg + host + addr + rtt + res
 
         self.stdscr.addstr(N_HEADERS + 1, self.space, string, self.mode)
-
-        return True
 
     def _display_result(self, line, arg_width, name_width, host_width,
                         addr_width, rtt_width):
@@ -146,18 +139,16 @@ class PPPing(object):
         self.stdscr.addstr(line.x_pos(), self.space - len(SPACE),
                            string.replace(ARROW, SPACE), self.mode)
 
-        return True
-
     def run(self, stdscr):
         self.stdscr = stdscr
         self.stdscr.clear()
 
-        lines = {a: Line(i + N_HEADERS + 2, a, n, self.space) for i, (a, n) in
-                 enumerate(zip(self.args, self.names))}
+        lines = [(a, Line(i + N_HEADERS + 2, a, n, self.space))
+                 for i, (a, n) in enumerate(zip(self.args, self.names))]
 
         hostname = socket.gethostname()
-        info = '{}{}{}{}{}({})\n'.format(SPACE, FROM, SPACE, hostname, SPACE,
-                                         socket.gethostbyname(hostname))
+        addr = socket.gethostbyname(hostname)
+        info = SPACE + FROM + SPACE + hostname + SPACE + '({})'.format(addr)
 
         arg_width = len(ARG)
         host_width = len(HOST)
@@ -168,13 +159,15 @@ class PPPing(object):
         begin = time.monotonic()
 
         while time.monotonic() - begin < self.duration:
-            for a, line in lines.items():
+            for a, line in lines:
                 try:
-                    out = subprocess.run([COMMAND, a, COMMAND_OPT], check=True,
-                                         stdout=subprocess.PIPE,
+                    out = subprocess.run([COMMAND, a, COMMAND_OPT],
+                                         check=True, stdout=subprocess.PIPE,
                                          stderr=subprocess.DEVNULL,
-                                         timeout=self.timeout).stdout.decode()
-                except (TimeoutExpired, CalledProcessError):
+                                         timeout=self.timeout,
+                                         ).stdout.decode()
+                except (subprocess.TimeoutExpired,
+                        subprocess.CalledProcessError):
                     c = FAILED
                 else:
                     p = PingResult(out)
@@ -183,21 +176,17 @@ class PPPing(object):
 
                 line.add_char(c)
 
-                arg_width = max(max([len(v.arg) for v in lines.values()]),
-                                arg_width)
-                host_width = max(max([len(v.host) for v in lines.values()]),
-                                 host_width)
-                addr_width = max(max([len(v.address) for v in lines.values()]),
-                                 addr_width)
-                rtt_width = max(max([len(v.rtt) for v in lines.values()]),
-                                rtt_width)
+                arg_width = max(len(line.arg), arg_width)
+                host_width = max(len(line.host), host_width)
+                addr_width = max(len(line.address), addr_width)
+                rtt_width = max(len(line.rtt), rtt_width)
 
                 self._display_title(info, arg_width, name_width, host_width,
                                     addr_width, rtt_width)
                 self._display_result(line, arg_width, name_width, host_width,
                                      addr_width, rtt_width)
 
-            for line in lines.values():
+            for _, line in lines:
                 line.reduce(self.res_width)
 
             time.sleep(self.interval)
