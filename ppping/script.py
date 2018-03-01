@@ -39,9 +39,10 @@ def main(*, ppping=None):
 
     if ppping is None:
         ppping = PPPing(args.args, timeout=args.timeout, rtt_scale=args.scale,
-                        res_width=args.length, space=args.space, duration=args.duration,
-                        interval=args.interval, step=args.step,
-                        config=args.config, no_host=args.no_host)
+                        res_width=args.length, space=args.space,
+                        duration=args.duration, interval=args.interval,
+                        step=args.step, config=args.config,
+                        no_host=args.no_host)
 
     try:
         curses.wrapper(ppping.run)
