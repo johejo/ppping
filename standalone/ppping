@@ -1,0 +1,333 @@
+#!/usr/bin/env python3
+DECIMAL_PLACES = 2
+
+
+class Line(object):
+    def __init__(self, x, arg='', name='', space=1):
+        self.arg = arg
+        self.name = name
+        self.host = str(None)
+        self.address = str(None)
+        self._x = x
+        self.line = ''
+        self.rtt = str(0)
+        self.space = space
+
+    def add_info(self, ping_result):
+        self.host = ping_result.hostname
+        self.address = ping_result.address
+        self.rtt = str(round(ping_result.time, DECIMAL_PLACES))
+
+    def add_char(self, char):
+        self.line += char
+
+    def reduce(self, result_len):
+        if len(self.line) > result_len:
+            self.line = self.line[1:]
+
+    def x_pos(self):
+        return self._x
+
+    def y_pos(self):
+        return len(self.line)
+
+    def _ljust(self, target, length):
+        return target.ljust(length + self.space)
+
+    def get_line(self, head_char, no_host,
+                 arg_len, name_len, host_len, address_len, rtt_len):
+
+        arg = self._ljust(self.arg, arg_len)
+        name = self._ljust(self.name, name_len)
+        host = self._ljust(self.host, host_len)
+        addr = self._ljust(self.address, address_len)
+        rtt = self._ljust(self.rtt, rtt_len)
+
+        if name_len and no_host:
+            diff = ''.join([name])
+        elif name_len and (not no_host):
+            diff = ''.join([name, host])
+        elif (not name_len) and no_host:
+            diff = ''.join([])
+        else:
+            diff = ''.join([host])
+
+        line = ''.join([head_char, arg, diff, addr, rtt, self.line])
+
+        return line
+class PingParserError(Exception):
+    pass
+
+
+class PingResult(object):
+    def __init__(self, ping_message):
+        self.raw = ping_message
+        if type(self.raw) is bytes:
+            self.raw = self.raw.decode()
+
+        try:
+            sp = self.raw.split('\n')[1].split(' ')
+
+            if len(sp) == 9:
+                self.hostname = sp[-6]
+                self.address = sp[-5][1:-2]
+            elif len(sp) == 8:
+                self.hostname = sp[-5][:-1]
+                self.address = self.hostname
+            else:
+                raise PingParserError(self.raw)
+
+            self.icmp_seq = int(sp[-4].split('=')[-1])
+            self.ttl = int(sp[-3].split('=')[-1])
+            self.time = float(sp[-2].split('=')[-1])
+
+        except (ValueError, IndexError):
+            raise PingParserError
+import sys
+import time
+import os
+import curses
+import socket
+import configparser
+import subprocess
+
+
+COMMAND = 'ping'
+COMMAND_OPT = '-c1'
+
+N_HEADERS = 2
+
+FAILED = 'X'
+ARROW = '>'
+SPACE = ' '
+
+ARG = 'arg'
+NAME = 'name'
+HOST = 'host'
+ADDRESS = 'address'
+RTT = 'rtt'
+RESULT = 'result'
+
+HOSTS = 'Hosts'
+FROM = 'From:'
+
+
+class PPPing(object):
+    def __init__(self, args, *, timeout=1, rtt_scale=10, res_width=5, space=1,
+                 duration=sys.maxsize, interval=0.8, step=0.05,
+                 config=None, no_host=False, mode=curses.A_BOLD):
+        self.args = args
+        self.res_width = res_width
+        self.rtt_scale = rtt_scale
+        self.space = space
+        self.timeout = timeout
+        self.duration = duration
+        self.step = step
+        self.config = config
+        self.names = ['' for _ in self.args]
+        self.no_host = no_host
+        self.interval = interval
+        self.mode = mode
+        self.stdscr = None
+
+        if self.config is not None:
+            conf = configparser.ConfigParser()
+
+            if not os.path.exists(self.config):
+                err = 'Configuration file "{}"　was not found.'.format(
+                    self.config)
+                raise FileNotFoundError(err)
+
+            conf.read(self.config)
+            d = dict(conf.items(conf.sections()[conf.sections().index(HOSTS)]))
+
+            self.names = list(d.keys())
+            self.args = list(d.values())
+
+        self.lines = [Line(i + N_HEADERS + 2, a, n, self.space)
+                      for i, (a, n) in enumerate(zip(self.args, self.names))]
+
+        hostname = socket.gethostname()
+        addr = socket.gethostbyname(hostname)
+        self.info = SPACE.join(['', FROM, hostname, '({})'.format(addr)])
+
+        self._arg_width = len(ARG)
+        self._host_width = len(HOST)
+        self._addr_width = len(ADDRESS)
+        self._rtt_width = len(RTT)
+        self._name_width = max([len(name) for name in self.names])
+
+    def scale_char(self, rtt):
+        if rtt < self.rtt_scale:
+            char = '▁'
+        elif rtt < self.rtt_scale * 2:
+            char = '▂'
+        elif rtt < self.rtt_scale * 3:
+            char = '▃'
+        elif rtt < self.rtt_scale * 4:
+            char = '▄'
+        elif rtt < self.rtt_scale * 5:
+            char = '▅'
+        elif rtt < self.rtt_scale * 6:
+            char = '▆'
+        elif rtt < self.rtt_scale * 7:
+            char = '▇'
+        else:
+            char = '█'
+
+        return char
+
+    def _ljust(self, target, width):
+        return target.ljust(width + self.space)
+
+    def _calc_width(self):
+        nc = sum((bool(self._arg_width), bool(self._name_width),
+                  bool(not self.no_host), bool(self._addr_width),
+                  bool(self._rtt_width), bool(self.res_width)))
+
+        s = sum((self._arg_width, self._name_width, self._host_width,
+                 self._addr_width, self._rtt_width, self.res_width,
+                 nc * self.space))
+
+        return max(s, len(self.info))
+
+    def _display_title(self):
+        version = '{} v{}'.format(__title__, __version__)
+
+        width = self._calc_width() + len(version)
+
+        self.stdscr.addstr(0, 0, version.rjust(width // 2), self.mode)
+        self.stdscr.addstr(1, self.space - len(SPACE), self.info, self.mode)
+
+        arg = self._ljust(ARG, self._arg_width)
+        name = self._ljust(NAME, self._name_width)
+        host = self._ljust(HOST, self._host_width)
+        addr = self._ljust(ADDRESS, self._addr_width)
+        rtt = self._ljust(RTT, self._rtt_width)
+        res = RESULT.ljust(self.res_width)
+
+        if self._name_width and self.no_host:
+            diff = ''.join([name])
+        elif self._name_width and (not self.no_host):
+            diff = ''.join([name, host])
+        elif (not self._name_width) and self.no_host:
+            diff = ''.join([])
+        else:
+            diff = ''.join([host])
+
+        string = ''.join([arg, diff, addr, rtt, res])
+
+        self.stdscr.addstr(N_HEADERS + 1, self.space, string, self.mode)
+
+    def _display_result(self, line):
+
+        string = line.get_line(ARROW, self.no_host, self._arg_width,
+                               self._name_width, self._host_width,
+                               self._addr_width, self._rtt_width)
+        self.stdscr.addstr(line.x_pos(), self.space - len(ARROW), string,
+                           self.mode)
+
+        time.sleep(self.step)
+
+        self.stdscr.refresh()
+        self.stdscr.addstr(line.x_pos(), self.space - len(SPACE),
+                           string.replace(ARROW, SPACE), self.mode)
+
+    def _display(self):
+        for arg, line in zip(self.args, self.lines):
+            try:
+                out = subprocess.run([COMMAND, arg, COMMAND_OPT],
+                                     check=True, stdout=subprocess.PIPE,
+                                     stderr=subprocess.DEVNULL,
+                                     timeout=self.timeout,
+                                     ).stdout.decode()
+            except (subprocess.TimeoutExpired,
+                    subprocess.CalledProcessError):
+                c = FAILED
+            else:
+                p = PingResult(out)
+                c = self.scale_char(p.time)
+                line.add_info(p)
+
+            line.add_char(c)
+
+            self._arg_width = max(len(line.arg), self._arg_width)
+            self._host_width = max(len(line.host), self._host_width)
+            self._addr_width = max(len(line.address), self._addr_width)
+            self._rtt_width = max(len(line.rtt), self._rtt_width)
+
+            self._display_title()
+            self._display_result(line)
+
+        for line in self.lines:
+            line.reduce(self.res_width)
+
+    def run(self, stdscr):
+        self.stdscr = stdscr
+        self.stdscr.clear()
+
+        begin = time.monotonic()
+
+        while time.monotonic() - begin < self.duration:
+            self._display()
+            time.sleep(self.interval)
+import argparse
+import sys
+import curses
+
+
+def set_args():
+    p = argparse.ArgumentParser()
+    p.add_argument('args', nargs='*', help='hosts or addresses')
+    p.add_argument('-t', '--timeout', nargs='?', default=1,
+                   type=int, help='timeout')
+    p.add_argument('--scale', nargs='?', default=10,
+                   type=float, help='scale of RTT')
+    p.add_argument('--space', nargs='?', default=1,
+                   type=int, help='space length')
+    p.add_argument('-l', '--length', nargs='?', default=5,
+                   type=int, help='result length')
+    p.add_argument('-d', '--duration', nargs='?', default=sys.maxsize,
+                   type=float, help='duration time')
+    p.add_argument('-i', '--interval', nargs='?', default=0.8,
+                   type=float, help='interval')
+    p.add_argument('--step', nargs='?', default=0.05,
+                   type=float, help='step time per host')
+    p.add_argument('-c', '--config', type=str, help='configuration file')
+    p.add_argument('-n', '--no-host', action='store_true',
+                   help='do not display hosts')
+    p.add_argument('-v', '--version', action='version', version=__version__,
+                   help='show version and exit')
+
+    return p.parse_args()
+
+
+def main(*, ppping=None):
+    args = set_args()
+
+    if len(sys.argv) == 1:
+        sys.stderr.write('{0}: try \'{0} --help\'\n'.format(__title__))
+        exit()
+
+    if ppping is None:
+        ppping = PPPing(args.args, timeout=args.timeout, rtt_scale=args.scale,
+                        res_width=args.length, space=args.space,
+                        duration=args.duration, interval=args.interval,
+                        step=args.step, config=args.config,
+                        no_host=args.no_host)
+
+    try:
+        curses.wrapper(ppping.run)
+    except (KeyboardInterrupt, ProcessLookupError):
+        exit()
+__title__ = 'ppping'
+__description__ = 'ping monitoring tool written in Python'
+__url__ = 'http://github.com/johejo/ppping'
+__version__ = '0.1.8'
+__author__ = 'Mitsuo Heijo'
+__author_email__ = 'mitsuo_h@outlook.com'
+__license__ = 'MIT'
+__copyright__ = 'Copyright 2018 Mitsuo Heijo'
+if __name__ == '__main__':
+    main()
+
