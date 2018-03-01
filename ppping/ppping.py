@@ -104,7 +104,7 @@ class PPPing(object):
                   bool(self._rtt_width), bool(self.res_width)))
 
         s = sum((self._arg_width, self._name_width, self._host_width,
-                 self._addr_width, self._rtt_width,  self.res_width,
+                 self._addr_width, self._rtt_width, self.res_width,
                  nc * self.space))
 
         return max(s, len(self.info))
