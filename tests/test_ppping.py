@@ -15,27 +15,29 @@ class DummyScreen(object):
 
 
 class TestPPPing(object):
-    def test_ppping(self):
-        scr = DummyScreen()
+    scr = DummyScreen()
+    test_host = ['localhost', 'google.com', '8.8.8.8']
 
-        test_host = ['localhost', 'google.com', '8.8.8.8']
+    def test_no_host(self):
 
-        p = PPPing(args=test_host, duration=3, no_host=True)
-        p.run(scr)
+        p = PPPing(args=self.test_host, duration=3, no_host=True)
+        p.run(self.scr)
 
+    def test_no_host_false(self):
+        p = PPPing(args=self.test_host, duration=3, no_host=False)
+        p.run(self.scr)
+
+    def test_config_no_host(self):
         p = PPPing(args=[], duration=3, config='ppping.conf', no_host=True)
-        p.run(scr)
+        p.run(self.scr)
 
-        p = PPPing(args=test_host, duration=3, no_host=False)
-        p.run(scr)
-
+    def test_config_no_host_false(self):
         p = PPPing(args=[], duration=3, config='ppping.conf', no_host=False)
-        p.run(scr)
+        p.run(self.scr)
 
     def test_failed_host(self):
-        scr = DummyScreen()
         p = PPPing(args=['foo.bar'], duration=3, no_host=True)
-        p.run(scr)
+        p.run(self.scr)
 
     def test_scale_char(self):
         p = PPPing(args=['foo.bar'], duration=3, no_host=True)
