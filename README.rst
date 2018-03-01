@@ -35,11 +35,13 @@ Demo
 Environment
 -----------
 
-List of supported environments
+ppping works using python's curses
 
-- Linux distribution such as Ubuntu, CentOS, ArchLinux etc.
-- Windows Subsystem for Linux
-- macOS
+List of environments actually checking the operation
+
+- Linux distribution (Ubuntu, ArchLinux)
+- Windows Subsystem for Linux (Ubuntu)
+- UNIX (macOS)
 
 Requirements
 ------------
@@ -49,9 +51,21 @@ Requirements
 Install
 -------
 
+From PyPi (recommended)
+~~~~~~~~~~~~~~~~~~~~~~~
 .. code:: bash
 
     $ pip install ppping
+
+Standalone
+~~~~~~~~~~
+
+Download standalone script to a directory that is convenient for you (e.g. "~/.local/bin/" or "/usr/local/bin/")
+
+.. code:: bash
+
+    $ curl "https://raw.githubusercontent.com/johejo/ppping/master/standalone/ppping" -o ppping
+    $ chmod +x ppping
 
 
 Usage

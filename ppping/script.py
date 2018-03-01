@@ -1,11 +1,11 @@
-from argparse import ArgumentParser
+import argparse
 import sys
 import curses
 from ppping import PPPing, __version__, __title__
 
 
 def set_args():
-    p = ArgumentParser()
+    p = argparse.ArgumentParser()
     p.add_argument('args', nargs='*', help='hosts or addresses')
     p.add_argument('-t', '--timeout', nargs='?', default=1,
                    type=int, help='timeout')
