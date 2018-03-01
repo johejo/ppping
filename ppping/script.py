@@ -30,19 +30,20 @@ def set_args():
     return p.parse_args()
 
 
-def main():
+def main(*, ppping=None):
     args = set_args()
 
     if len(sys.argv) == 1:
         sys.stderr.write('{0}: try \'{0} --help\'\n'.format(__title__))
         exit()
 
-    p = PPPing(args.args, timeout=args.timeout, rtt_scale=args.scale,
-               res_width=args.length, space=args.space, duration=args.duration,
-               interval=args.interval, step=args.step,
-               config=args.config, no_host=args.no_host)
+    if ppping is None:
+        ppping = PPPing(args.args, timeout=args.timeout, rtt_scale=args.scale,
+                        res_width=args.length, space=args.space, duration=args.duration,
+                        interval=args.interval, step=args.step,
+                        config=args.config, no_host=args.no_host)
 
     try:
-        curses.wrapper(p.run)
+        curses.wrapper(ppping.run)
     except (KeyboardInterrupt, ProcessLookupError):
         exit()

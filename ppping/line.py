@@ -43,12 +43,14 @@ class Line(object):
         rtt = self._ljust(self.rtt, rtt_len)
 
         if name_len and no_host:
-            line = head_char + arg + name + addr + rtt + self.line
+            diff = ''.join([name])
         elif name_len and (not no_host):
-            line = head_char + arg + name + host + addr + rtt + self.line
+            diff = ''.join([name, host])
         elif (not name_len) and no_host:
-            line = head_char + arg + addr + rtt + self.line
+            diff = ''.join([])
         else:
-            line = head_char + arg + host + addr + rtt + self.line
+            diff = ''.join([host])
+
+        line = ''.join([head_char, arg, diff, addr, rtt, self.line])
 
         return line
