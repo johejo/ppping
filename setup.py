@@ -13,7 +13,7 @@ with open(os.path.join(here, 'ppping', '__version__.py'),
     exec(f.read(), about)
 
 tests_requirements = [
-    'pytest-cov', 'pytest'
+    'pytest-cov', 'pytest', 'flake8'
 ]
 
 setup(
@@ -24,6 +24,7 @@ setup(
     description=about['__description__'],
     long_description=readme,
     packages=find_packages(),
+    python_requires='>=3.5',
     license=about['__license__'],
     url=about['__url__'],
     py_modules=['ppping'],
