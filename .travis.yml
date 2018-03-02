@@ -25,7 +25,7 @@ before_script:
 
 script:
   - "flake8 --ignore=F401 tests ppping"
-  - "py.test --cov ppping tests/"
+  - "pytest --cov ppping tests/"
 
 after_script:
   - "coverage xml"

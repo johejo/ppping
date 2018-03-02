@@ -43,5 +43,5 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Topic :: System :: Networking :: Monitoring',
     ],
-    tests_requires=tests_requirements,
+    tests_require=tests_requirements,
 )
