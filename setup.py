@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 import os
 from codecs import open
 
@@ -23,7 +23,7 @@ setup(
     author_email=about['__author_email__'],
     description=about['__description__'],
     long_description=readme,
-    packages=find_packages(),
+    packages=['ppping'],
     python_requires='>=3.5',
     license=about['__license__'],
     url=about['__url__'],
