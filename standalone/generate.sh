@@ -9,4 +9,4 @@ readonly GENERATED=${SCRIPT_DIR}/ppping
 echo "#!/usr/bin/env ${PYTHON_COMMAND}" > ${GENERATED}
 cat ${PPPING_DIR}/line.py ${PPPING_DIR}/parser.py ${PPPING_DIR}/ppping.py ${PPPING_DIR}/script.py ${PPPING_DIR}/__version__.py | grep -v "from" >> ${GENERATED}
 chmod +x ${GENERATED}
-echo -e "if __name__ == '__mainw__':\n    main()\n" >> ${GENERATED}
+echo -e "if __name__ == '__main__':\n    main()\n" >> ${GENERATED}
