@@ -24,7 +24,7 @@ before_script:
   - "./cc-test-reporter before-build"
 
 script:
-  - "flake8 --ignore=F401 tests ppping"
+  - "flake8 tests ppping"
   - "pytest --cov ppping tests/"
 
 after_script:
