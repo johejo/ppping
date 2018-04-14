@@ -83,9 +83,12 @@ class PPPing(object):
         if not self.closed:
             try:
                 ipv4 = get_ip_info(CURL_OPT_IPV4)
-                ipv6 = get_ip_info(CURL_OPT_IPV6)
             except (subprocess.TimeoutExpired, subprocess.CalledProcessError):
                 ipv4 = None
+
+            try:
+                ipv6 = get_ip_info(CURL_OPT_IPV6)
+            except (subprocess.TimeoutExpired, subprocess.CalledProcessError):
                 ipv6 = None
 
             self.info = SPACE.join([FROM, hostname, '({})'.format(local_addr),
