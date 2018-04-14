@@ -1,7 +1,7 @@
 __title__ = 'ppping'
 __description__ = 'ping monitoring tool written in Python'
 __url__ = 'http://github.com/johejo/ppping'
-__version__ = '0.1.8'
+__version__ = '0.1.9'
 __author__ = 'Mitsuo Heijo'
 __author_email__ = 'mitsuo_h@outlook.com'
 __license__ = 'MIT'

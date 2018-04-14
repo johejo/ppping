@@ -10,10 +10,10 @@ from .line import Line
 from .parser import PingResult
 from .__version__ import __version__, __title__
 
-COMMAND = 'ping'
-COMMAND_OPT = '-c1'
+PING_CMD = 'ping'
+PING_OPT = '-c1'
 
-N_HEADERS = 2
+N_HEADERS = 3
 
 FAILED = 'X'
 ARROW = '>'
@@ -28,11 +28,24 @@ RESULT = 'result'
 
 HOSTS = 'Hosts'
 FROM = 'From:'
+GLOBAL = 'Global:'
+
+IFCONFIG_URL = 'https://ifconfig.io/ip'
+CURL_CMD = 'curl'
+CURL_OPT_IPV4 = '-4'
+CURL_OPT_IPV6 = '-6'
+
+
+def get_ip_info(opt):
+    return subprocess.run([CURL_CMD, IFCONFIG_URL, opt],
+                          check=True, stdout=subprocess.PIPE,
+                          stderr=subprocess.DEVNULL,
+                          ).stdout.decode().strip()
 
 
 class PPPing(object):
     def __init__(self, args, *, timeout=1, rtt_scale=10, res_width=5, space=1,
-                 duration=sys.maxsize, interval=0.8, step=0.05,
+                 duration=sys.maxsize, interval=0.8, step=0.05, closed=False,
                  config=None, no_host=False, mode=curses.A_BOLD):
         self.args = args
         self.res_width = res_width
@@ -46,7 +59,9 @@ class PPPing(object):
         self.no_host = no_host
         self.interval = interval
         self.mode = mode
+        self.closed = closed
         self.stdscr = None
+        self._n_headers = N_HEADERS
 
         if self.config is not None:
             conf = configparser.ConfigParser()
@@ -62,12 +77,30 @@ class PPPing(object):
             self.names = list(d.keys())
             self.args = list(d.values())
 
-        self.lines = [Line(i + N_HEADERS + 2, a, n, self.space)
-                      for i, (a, n) in enumerate(zip(self.args, self.names))]
-
         hostname = socket.gethostname()
-        addr = socket.gethostbyname(hostname)
-        self.info = SPACE.join(['', FROM, hostname, '({})'.format(addr)])
+        local_addr = socket.gethostbyname(hostname)
+
+        if not self.closed:
+            try:
+                ipv4 = get_ip_info(CURL_OPT_IPV4)
+                ipv6 = get_ip_info(CURL_OPT_IPV6)
+            except (subprocess.TimeoutExpired, subprocess.CalledProcessError):
+                sys.stdout.write('Can not get global IP.\n'
+                                 'Please check your internet access.\n'
+                                 'If you use closed network, '
+                                 'try \'--closed\' option.\n')
+                exit(1)
+                return
+
+            self.info = SPACE.join([FROM, hostname, '({})'.format(local_addr),
+                                    '\n', GLOBAL,
+                                    '({}, {})'.format(ipv4, ipv6)])
+        else:
+            self.info = SPACE.join([FROM, hostname, '({})'.format(local_addr)])
+            self._n_headers -= 1
+
+        self.lines = [Line(i + self._n_headers + 2, a, n, self.space)
+                      for i, (a, n) in enumerate(zip(self.args, self.names))]
 
         self._arg_width = len(ARG)
         self._host_width = len(HOST)
@@ -98,24 +131,11 @@ class PPPing(object):
     def _ljust(self, target, width):
         return target.ljust(width + self.space)
 
-    def _calc_width(self):
-        nc = sum((bool(self._arg_width), bool(self._name_width),
-                  bool(not self.no_host), bool(self._addr_width),
-                  bool(self._rtt_width), bool(self.res_width)))
-
-        s = sum((self._arg_width, self._name_width, self._host_width,
-                 self._addr_width, self._rtt_width, self.res_width,
-                 nc * self.space))
-
-        return max(s, len(self.info))
-
     def _display_title(self):
         version = '{} v{}'.format(__title__, __version__)
 
-        width = self._calc_width() + len(version)
-
-        self.stdscr.addstr(0, 0, version.rjust(width // 2), self.mode)
-        self.stdscr.addstr(1, self.space - len(SPACE), self.info, self.mode)
+        self.stdscr.addstr(0, 1, version, self.mode)
+        self.stdscr.addstr(1, self.space, self.info, self.mode)
 
         arg = self._ljust(ARG, self._arg_width)
         name = self._ljust(NAME, self._name_width)
@@ -135,7 +155,7 @@ class PPPing(object):
 
         string = ''.join([arg, diff, addr, rtt, res])
 
-        self.stdscr.addstr(N_HEADERS + 1, self.space, string, self.mode)
+        self.stdscr.addstr(self._n_headers + 1, self.space, string, self.mode)
 
     def _display_result(self, line):
 
@@ -154,7 +174,7 @@ class PPPing(object):
     def _display(self):
         for arg, line in zip(self.args, self.lines):
             try:
-                out = subprocess.run([COMMAND, arg, COMMAND_OPT],
+                out = subprocess.run([PING_CMD, arg, PING_OPT],
                                      check=True, stdout=subprocess.PIPE,
                                      stderr=subprocess.DEVNULL,
                                      timeout=self.timeout,
