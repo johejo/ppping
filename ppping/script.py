@@ -9,7 +9,7 @@ def set_args():
     p.add_argument('args', nargs='*', help='hosts or addresses')
     p.add_argument('-t', '--timeout', nargs='?', default=1,
                    type=int, help='timeout')
-    p.add_argument('--scale', nargs='?', default=10,
+    p.add_argument('-s', '--scale', nargs='?', default=10,
                    type=float, help='scale of RTT')
     p.add_argument('--space', nargs='?', default=1,
                    type=int, help='space length')
@@ -24,6 +24,8 @@ def set_args():
     p.add_argument('-c', '--config', type=str, help='configuration file')
     p.add_argument('-n', '--no-host', action='store_true',
                    help='do not display hosts')
+    p.add_argument('-C', '--closed', action='store_true',
+                   help='do not acquire global IP address')
     p.add_argument('-v', '--version', action='version', version=__version__,
                    help='show version and exit')
 
@@ -35,16 +37,16 @@ def main(*, ppping=None):
 
     if len(sys.argv) == 1:
         sys.stderr.write('{0}: try \'{0} --help\'\n'.format(__title__))
-        exit()
+        exit(1)
 
     if ppping is None:
         ppping = PPPing(args.args, timeout=args.timeout, rtt_scale=args.scale,
                         res_width=args.length, space=args.space,
                         duration=args.duration, interval=args.interval,
-                        step=args.step, config=args.config,
+                        step=args.step, config=args.config, closed=args.closed,
                         no_host=args.no_host)
 
     try:
         curses.wrapper(ppping.run)
     except (KeyboardInterrupt, ProcessLookupError):
-        exit()
+        exit(0)
