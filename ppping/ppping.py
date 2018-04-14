@@ -39,7 +39,7 @@ CURL_OPT_IPV6 = '-6'
 def get_ip_info(opt):
     return subprocess.run([CURL_CMD, IFCONFIG_URL, opt],
                           check=True, stdout=subprocess.PIPE,
-                          stderr=subprocess.DEVNULL,
+                          stderr=subprocess.DEVNULL, timeout=2,
                           ).stdout.decode().strip()
 
 
@@ -85,12 +85,8 @@ class PPPing(object):
                 ipv4 = get_ip_info(CURL_OPT_IPV4)
                 ipv6 = get_ip_info(CURL_OPT_IPV6)
             except (subprocess.TimeoutExpired, subprocess.CalledProcessError):
-                sys.stdout.write('Can not get global IP.\n'
-                                 'Please check your internet access.\n'
-                                 'If you use closed network, '
-                                 'try \'--closed\' option.\n')
-                exit(1)
-                return
+                ipv4 = None
+                ipv6 = None
 
             self.info = SPACE.join([FROM, hostname, '({})'.format(local_addr),
                                     '\n', GLOBAL,
