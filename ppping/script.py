@@ -26,6 +26,10 @@ def set_args():
                    help='do not display hosts')
     p.add_argument('-C', '--closed', action='store_true',
                    help='do not acquire global IP address')
+    p.add_argument('-4', '--ipv4', action='store_true', default=False,
+                   help='use ipv4')
+    p.add_argument('-6', '--ipv6', action='store_true', default=False,
+                   help='use ipv6')
     p.add_argument('-v', '--version', action='version', version=__version__,
                    help='show version and exit')
 
