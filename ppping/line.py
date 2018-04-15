@@ -21,7 +21,7 @@ class Line(object):
         self.line += char
 
     def reduce(self, result_len):
-        if len(self.line) > result_len:
+        if len(self.line) >= result_len:
             self.line = self.line[1:]
 
     def x_pos(self):
