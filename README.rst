@@ -46,25 +46,26 @@ List of environments actually checking the operation
 Requirements
 ------------
 
-- Python3
+- Python 3.5 or later
+- cURL (optional: used to acquire global IP)
 
 Install
 -------
 
-From PyPi (recommended)
+From PyPi
 ~~~~~~~~~~~~~~~~~~~~~~~
 .. code:: bash
 
-    $ pip install ppping
+    $ pip install -U ppping
 
-Standalone
+Standalone (recommended)
 ~~~~~~~~~~
 
 Download standalone script to a directory that is convenient for you (e.g. "~/.local/bin/" or "/usr/local/bin/")
 
 .. code:: bash
 
-    $ curl "https://raw.githubusercontent.com/johejo/ppping/master/standalone/ppping" -o ppping
+    $ curl "https://raw.githubusercontent.com/johejo/ppping/master/standalone/ppping" -O
     $ chmod +x ppping
 
 

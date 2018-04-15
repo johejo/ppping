@@ -2,24 +2,7 @@ import pytest
 import sys
 import curses
 
-from ppping.ppping import PPPing
 from ppping.script import main, set_args
-
-
-class DummyPPPingKeyboardInterrupt(PPPing):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    def run(self, stdscr):
-        raise KeyboardInterrupt
-
-
-class DummyPPPingProcessLookupError(PPPing):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    def run(self, stdscr):
-        raise ProcessLookupError
 
 
 def test_set_args():
@@ -39,16 +22,3 @@ def test_script_no_args():
     sys.argv = ['test']
     with pytest.raises(SystemExit):
         main()
-
-
-def test_quit():
-    dummy = DummyPPPingKeyboardInterrupt(args=[], config='ppping.conf',
-                                         duration=3, no_host=False)
-
-    with pytest.raises(SystemExit):
-        main(ppping=dummy)
-
-    dummy = DummyPPPingProcessLookupError(args=[], config='ppping.conf',
-                                          duration=3, no_host=False)
-    with pytest.raises(SystemExit):
-        main(ppping=dummy)

@@ -56,3 +56,17 @@ def test_scale_char():
 def test_open_config():
     with pytest.raises(FileNotFoundError):
         PPPing(args=[], duration=3, config='nothing.conf', no_host=False)
+
+
+def test_closed_network():
+    p = PPPing(args=test_host, duration=3, no_host=True, closed=True)
+    assert p._n_headers == 2
+    assert p.info.find('Global') <= 0
+    p.run(scr)
+
+
+def test_connected_network():
+    p = PPPing(args=test_host, duration=3, no_host=True, closed=False)
+    assert p._n_headers == 3
+    assert p.info.find('Global') > 0
+    p.run(scr)
