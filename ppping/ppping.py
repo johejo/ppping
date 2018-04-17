@@ -10,9 +10,6 @@ from .line import Line
 from .parser import PingResult
 from .__version__ import __version__, __title__
 
-PING_CMD = 'ping'
-PING_OPT = '-c1'
-
 N_HEADERS = 3
 
 FAILED = 'X'
@@ -30,10 +27,12 @@ HOSTS = 'Hosts'
 FROM = 'From:'
 GLOBAL = 'Global:'
 
+PING_CMD = 'ping'
+PING_OPT = '-c1'
 IFCONFIG_URL = 'https://ifconfig.io/ip'
 CURL_CMD = 'curl'
-CURL_OPT_IPV4 = '-4'
-CURL_OPT_IPV6 = '-6'
+OPT_IPV4 = '-4'
+OPT_IPV6 = '-6'
 
 
 def get_ip_info(opt):
@@ -46,7 +45,8 @@ def get_ip_info(opt):
 class PPPing(object):
     def __init__(self, args, *, timeout=1, rtt_scale=10, res_width=5, space=1,
                  duration=sys.maxsize, interval=0.8, step=0.05, closed=False,
-                 config=None, no_host=False, mode=curses.A_BOLD):
+                 config=None, no_host=False, only_ipv4=False, only_ipv6=False,
+                 mode=curses.A_BOLD):
         self.args = args
         self.res_width = res_width
         self.rtt_scale = rtt_scale
@@ -61,6 +61,7 @@ class PPPing(object):
         self.mode = mode
         self.closed = closed
         self.stdscr = None
+        self._ping_opt = PING_OPT
         self._n_headers = N_HEADERS
 
         if self.config is not None:
@@ -81,15 +82,25 @@ class PPPing(object):
         local_addr = socket.gethostbyname(hostname)
 
         if not self.closed:
-            try:
-                ipv4 = get_ip_info(CURL_OPT_IPV4)
-            except (subprocess.TimeoutExpired, subprocess.CalledProcessError):
+            if only_ipv6:
+                self._ping_opt += SPACE + OPT_IPV6
                 ipv4 = None
+            else:
+                try:
+                    ipv4 = get_ip_info(OPT_IPV4)
+                except (subprocess.TimeoutExpired,
+                        subprocess.CalledProcessError):
+                    ipv4 = None
 
-            try:
-                ipv6 = get_ip_info(CURL_OPT_IPV6)
-            except (subprocess.TimeoutExpired, subprocess.CalledProcessError):
+            if only_ipv4:
+                self._ping_opt += SPACE + OPT_IPV4
                 ipv6 = None
+            else:
+                try:
+                    ipv6 = get_ip_info(OPT_IPV6)
+                except (subprocess.TimeoutExpired,
+                        subprocess.CalledProcessError):
+                    ipv6 = None
 
             self.info = SPACE.join([FROM, hostname, '({})'.format(local_addr),
                                     '\n', GLOBAL,
@@ -173,7 +184,7 @@ class PPPing(object):
     def _display(self):
         for arg, line in zip(self.args, self.lines):
             try:
-                out = subprocess.run([PING_CMD, arg, PING_OPT],
+                out = subprocess.run([PING_CMD, arg]+self._ping_opt.split(),
                                      check=True, stdout=subprocess.PIPE,
                                      stderr=subprocess.DEVNULL,
                                      timeout=self.timeout,

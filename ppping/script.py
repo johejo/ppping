@@ -21,13 +21,14 @@ def set_args():
                    type=float, help='interval')
     p.add_argument('--step', nargs='?', default=0.05,
                    type=float, help='step time per host')
-    p.add_argument('-c', '--config', type=str, help='configuration file')
+    p.add_argument('-c', '--config', type=str, help='configuration filename')
     p.add_argument('-n', '--no-host', action='store_true',
                    help='do not display hosts')
     p.add_argument('-C', '--closed', action='store_true',
                    help='do not acquire global IP address')
-    p.add_argument('-v', '--version', action='version', version=__version__,
-                   help='show version and exit')
+    p.add_argument('-4', '--ipv4', action='store_true', help='use only ipv4')
+    p.add_argument('-6', '--ipv6', action='store_true', help='use only ipv6')
+    p.add_argument('-v', '--version', action='version', version=__version__)
 
     return p.parse_args()
 
@@ -43,7 +44,8 @@ def main():
                     res_width=args.length, space=args.space,
                     duration=args.duration, interval=args.interval,
                     step=args.step, config=args.config, closed=args.closed,
-                    no_host=args.no_host)
+                    no_host=args.no_host, only_ipv4=args.ipv4,
+                    only_ipv6=args.ipv6)
 
     try:
         curses.wrapper(ppping.run)

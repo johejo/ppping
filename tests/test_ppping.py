@@ -1,6 +1,6 @@
 import pytest
 
-from ppping.ppping import PPPing
+from ppping.ppping import PPPing, GLOBAL, PING_OPT, OPT_IPV4, OPT_IPV6
 
 
 class DummyScreen(object):
@@ -61,12 +61,26 @@ def test_open_config():
 def test_closed_network():
     p = PPPing(args=test_host, duration=3, no_host=True, closed=True)
     assert p._n_headers == 2
-    assert p.info.find('Global') <= 0
+    assert p.info.find(GLOBAL) <= 0
     p.run(scr)
 
 
 def test_connected_network():
     p = PPPing(args=test_host, duration=3, no_host=True, closed=False)
     assert p._n_headers == 3
-    assert p.info.find('Global') > 0
+    assert p.info.find(GLOBAL) > 0
+    p.run(scr)
+
+
+def test_only_ipv4():
+    p = PPPing(args=test_host, duration=3, only_ipv4=True)
+    assert p.info.find(', None)') > 0
+    assert p._ping_opt == ' '.join([PING_OPT, OPT_IPV4])
+    p.run(scr)
+
+
+def test_only_ipv6():
+    p = PPPing(args=test_host, duration=3, only_ipv6=True)
+    assert p.info.find(GLOBAL + ' (None') > 0
+    assert p._ping_opt == ' '.join([PING_OPT, OPT_IPV6])
     p.run(scr)
