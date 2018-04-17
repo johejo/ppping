@@ -355,7 +355,7 @@ def set_args():
                    type=float, help='interval')
     p.add_argument('--step', nargs='?', default=0.05,
                    type=float, help='step time per host')
-    p.add_argument('-c', '--config', type=str, help='configuration file')
+    p.add_argument('-c', '--config', type=str, help='configuration filename')
     p.add_argument('-n', '--no-host', action='store_true',
                    help='do not display hosts')
     p.add_argument('-C', '--closed', action='store_true',
@@ -363,6 +363,7 @@ def set_args():
     p.add_argument('-4', '--ipv4', action='store_true', help='use only ipv4')
     p.add_argument('-6', '--ipv6', action='store_true', help='use only ipv6')
     p.add_argument('-v', '--version', action='version', version=__version__)
+
     return p.parse_args()
 
 
