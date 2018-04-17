@@ -124,9 +124,6 @@ import configparser
 import subprocess
 
 
-PING_CMD = 'ping'
-PING_OPT = '-c1'
-
 N_HEADERS = 3
 
 FAILED = 'X'
@@ -144,10 +141,12 @@ HOSTS = 'Hosts'
 FROM = 'From:'
 GLOBAL = 'Global:'
 
+PING_CMD = 'ping'
+PING_OPT = '-c1'
 IFCONFIG_URL = 'https://ifconfig.io/ip'
 CURL_CMD = 'curl'
-CURL_OPT_IPV4 = '-4'
-CURL_OPT_IPV6 = '-6'
+OPT_IPV4 = '-4'
+OPT_IPV6 = '-6'
 
 
 def get_ip_info(opt):
@@ -160,7 +159,8 @@ def get_ip_info(opt):
 class PPPing(object):
     def __init__(self, args, *, timeout=1, rtt_scale=10, res_width=5, space=1,
                  duration=sys.maxsize, interval=0.8, step=0.05, closed=False,
-                 config=None, no_host=False, mode=curses.A_BOLD):
+                 config=None, no_host=False, only_ipv4=False, only_ipv6=False,
+                 mode=curses.A_BOLD):
         self.args = args
         self.res_width = res_width
         self.rtt_scale = rtt_scale
@@ -175,6 +175,7 @@ class PPPing(object):
         self.mode = mode
         self.closed = closed
         self.stdscr = None
+        self._ping_opt = PING_OPT
         self._n_headers = N_HEADERS
 
         if self.config is not None:
@@ -195,15 +196,25 @@ class PPPing(object):
         local_addr = socket.gethostbyname(hostname)
 
         if not self.closed:
-            try:
-                ipv4 = get_ip_info(CURL_OPT_IPV4)
-            except (subprocess.TimeoutExpired, subprocess.CalledProcessError):
+            if only_ipv6:
+                self._ping_opt += SPACE + OPT_IPV6
                 ipv4 = None
+            else:
+                try:
+                    ipv4 = get_ip_info(OPT_IPV4)
+                except (subprocess.TimeoutExpired,
+                        subprocess.CalledProcessError):
+                    ipv4 = None
 
-            try:
-                ipv6 = get_ip_info(CURL_OPT_IPV6)
-            except (subprocess.TimeoutExpired, subprocess.CalledProcessError):
+            if only_ipv4:
+                self._ping_opt += SPACE + OPT_IPV4
                 ipv6 = None
+            else:
+                try:
+                    ipv6 = get_ip_info(OPT_IPV6)
+                except (subprocess.TimeoutExpired,
+                        subprocess.CalledProcessError):
+                    ipv6 = None
 
             self.info = SPACE.join([FROM, hostname, '({})'.format(local_addr),
                                     '\n', GLOBAL,
@@ -287,7 +298,7 @@ class PPPing(object):
     def _display(self):
         for arg, line in zip(self.args, self.lines):
             try:
-                out = subprocess.run([PING_CMD, arg, PING_OPT],
+                out = subprocess.run([PING_CMD, arg]+self._ping_opt.split(),
                                      check=True, stdout=subprocess.PIPE,
                                      stderr=subprocess.DEVNULL,
                                      timeout=self.timeout,
@@ -344,13 +355,14 @@ def set_args():
                    type=float, help='interval')
     p.add_argument('--step', nargs='?', default=0.05,
                    type=float, help='step time per host')
-    p.add_argument('-c', '--config', type=str, help='configuration file')
+    p.add_argument('-c', '--config', type=str, help='configuration filename')
     p.add_argument('-n', '--no-host', action='store_true',
                    help='do not display hosts')
     p.add_argument('-C', '--closed', action='store_true',
                    help='do not acquire global IP address')
-    p.add_argument('-v', '--version', action='version', version=__version__,
-                   help='show version and exit')
+    p.add_argument('-4', '--ipv4', action='store_true', help='use only ipv4')
+    p.add_argument('-6', '--ipv6', action='store_true', help='use only ipv6')
+    p.add_argument('-v', '--version', action='version', version=__version__)
 
     return p.parse_args()
 
@@ -366,7 +378,8 @@ def main():
                     res_width=args.length, space=args.space,
                     duration=args.duration, interval=args.interval,
                     step=args.step, config=args.config, closed=args.closed,
-                    no_host=args.no_host)
+                    no_host=args.no_host, only_ipv4=args.ipv4,
+                    only_ipv6=args.ipv6)
 
     try:
         curses.wrapper(ppping.run)
