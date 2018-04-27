@@ -1,7 +1,7 @@
 import pytest
 
 from ppping.ppping import (
-    PPPing, GLOBAL, PING_OPT, PING_CMD, PING6_CMD, OPT_IPV4, OPT_IPV6
+    PPPing, GLOBAL, PING_OPT, PING_CMD, PING6_CMD
 )
 
 
