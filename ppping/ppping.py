@@ -3,6 +3,7 @@ import time
 import os
 import curses
 import socket
+import shutil
 import configparser
 import subprocess
 
@@ -28,6 +29,7 @@ FROM = 'From:'
 GLOBAL = 'Global:'
 
 PING_CMD = 'ping'
+PING6_CMD = 'ping6'
 PING_OPT = '-c1'
 IFCONFIG_URL = 'https://ifconfig.io/ip'
 CURL_CMD = 'curl'
@@ -61,7 +63,7 @@ class PPPing(object):
         self.mode = mode
         self.closed = closed
         self.stdscr = None
-        self._ping_opt = PING_OPT
+        self._p_opt = PING_OPT
         self._n_headers = N_HEADERS
 
         if self.config is not None:
@@ -81,33 +83,41 @@ class PPPing(object):
         hostname = socket.gethostname()
         local_addr = socket.gethostbyname(hostname)
 
-        if not self.closed:
-            if only_ipv6:
-                self._ping_opt += SPACE + OPT_IPV6
-                ipv4 = None
+        if only_ipv6:
+            if shutil.which(PING6_CMD):
+                self._p_cmd = PING6_CMD
             else:
+                self._p_cmd = PING_CMD
+                self._p_opt += SPACE + OPT_IPV6
+            ipv4 = None
+        else:
+            self._p_cmd = PING_CMD
+            if not self.closed:
                 try:
                     ipv4 = get_ip_info(OPT_IPV4)
                 except (subprocess.TimeoutExpired,
                         subprocess.CalledProcessError):
                     ipv4 = None
-
-            if only_ipv4:
-                self._ping_opt += SPACE + OPT_IPV4
-                ipv6 = None
             else:
+                ipv4 = None
+
+        if only_ipv4:
+            if not shutil.which(PING6_CMD):
+                self._p_opt += SPACE + OPT_IPV4
+            ipv6 = None
+        else:
+            if not closed:
                 try:
                     ipv6 = get_ip_info(OPT_IPV6)
                 except (subprocess.TimeoutExpired,
                         subprocess.CalledProcessError):
                     ipv6 = None
+            else:
+                ipv6 = None
 
-            self.info = SPACE.join([FROM, hostname, '({})'.format(local_addr),
-                                    '\n', GLOBAL,
-                                    '({}, {})'.format(ipv4, ipv6)])
-        else:
-            self.info = SPACE.join([FROM, hostname, '({})'.format(local_addr)])
-            self._n_headers -= 1
+        self.info = SPACE.join([FROM, hostname, '({})'.format(local_addr),
+                                '\n', GLOBAL,
+                                '({}, {})'.format(ipv4, ipv6)])
 
         self.lines = [Line(i + self._n_headers + 2, a, n, self.space)
                       for i, (a, n) in enumerate(zip(self.args, self.names))]
@@ -184,7 +194,7 @@ class PPPing(object):
     def _display(self):
         for arg, line in zip(self.args, self.lines):
             try:
-                out = subprocess.run([PING_CMD, arg]+self._ping_opt.split(),
+                out = subprocess.run([self._p_cmd, arg]+self._p_opt.split(),
                                      check=True, stdout=subprocess.PIPE,
                                      stderr=subprocess.DEVNULL,
                                      timeout=self.timeout,
