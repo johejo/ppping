@@ -1,6 +1,7 @@
-from setuptools import setup
 import os
 from codecs import open
+
+from setuptools import setup
 
 with open('README.rst', 'r', 'utf-8') as f:
     readme = f.read()
@@ -44,4 +45,5 @@ setup(
         'Topic :: System :: Networking :: Monitoring',
     ],
     tests_require=tests_requirements,
+    platforms=['Linux', 'UNIX', 'macOS'],
 )
