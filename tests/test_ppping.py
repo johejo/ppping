@@ -1,7 +1,7 @@
 import pytest
 
 from ppping.ppping import (
-    PPPing, GLOBAL, PING_OPT, PING_CMD, PING6_CMD
+    PPPing, GLOBAL, PING_OPT, PING_CMD, PING4_CMD, PING6_CMD
 )
 
 
@@ -76,7 +76,7 @@ def test_connected_network():
 def test_only_ipv4():
     p = PPPing(args=test_host, duration=3, only_ipv4=True)
     assert p.info.find(', None)') > 0
-    assert p._p_cmd == PING_CMD
+    assert p._p_cmd == PING_CMD or PING4_CMD
     assert p._p_opt == ' '.join([PING_OPT])
     p.run(scr)
 
