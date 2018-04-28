@@ -1,15 +1,15 @@
+import configparser
+import curses
+import os
+import shutil
+import socket
+import subprocess
 import sys
 import time
-import os
-import curses
-import socket
-import shutil
-import configparser
-import subprocess
 
+from .__version__ import __version__, __title__
 from .line import Line
 from .parser import PingResult
-from .__version__ import __version__, __title__
 
 N_HEADERS = 3
 
@@ -29,6 +29,7 @@ FROM = 'From:'
 GLOBAL = 'Global:'
 
 PING_CMD = 'ping'
+PING4_CMD = 'ping4'
 PING6_CMD = 'ping6'
 PING_OPT = '-c1'
 IFCONFIG_URL = 'https://ifconfig.io/ip'
@@ -61,7 +62,6 @@ class PPPing(object):
         self.no_host = no_host
         self.interval = interval
         self.mode = mode
-        self.closed = closed
         self.stdscr = None
         self._p_opt = PING_OPT
         self._n_headers = N_HEADERS
@@ -92,7 +92,7 @@ class PPPing(object):
             ipv4 = None
         else:
             self._p_cmd = PING_CMD
-            if not self.closed:
+            if not closed:
                 try:
                     ipv4 = get_ip_info(OPT_IPV4)
                 except (subprocess.TimeoutExpired,
@@ -102,7 +102,9 @@ class PPPing(object):
                 ipv4 = None
 
         if only_ipv4:
-            if not shutil.which(PING6_CMD):
+            if shutil.which(PING4_CMD):
+                self._p_cmd = PING4_CMD
+            elif not shutil.which(PING6_CMD):
                 self._p_opt += SPACE + OPT_IPV4
             ipv6 = None
         else:
