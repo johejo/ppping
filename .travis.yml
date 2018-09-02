@@ -15,7 +15,7 @@ addons:
 
 install:
   - "pip install pipenv"
-  - "pipenv install --dev
+  - "pipenv install --dev"
 
 before_script:
   - "curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter"
