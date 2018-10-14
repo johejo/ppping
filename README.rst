@@ -18,8 +18,6 @@ ppping
    :target: https://codeclimate.com/github/johejo/ppping/test_coverage
    :alt: Test Coverage
 
-
-
 Description
 -----------
 
@@ -53,13 +51,13 @@ Install
 -------
 
 From PyPi
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~
 .. code:: bash
 
     $ pip install -U ppping
 
 Standalone (recommended)
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 Download standalone script to a directory that is convenient for you (e.g. "~/.local/bin/" or "/usr/local/bin/")
 
@@ -79,7 +77,7 @@ Simple Usage
 
     $ ppping foo.com bar.org WW.XX.YY.ZZ ...
 
-Future help
+Futher help
 
 .. code:: bash
 
@@ -100,6 +98,16 @@ This is a sample of configuration file.
     google: www.google.com
     google DNS: 8.8.8.8
     GitHub: www.github.com
+
+Docker image
+~~~~~~~~~~~~
+
+.. code:: bash
+
+    $ docker run --rm -it johejo/ppping foo.bar ...
+
+When using the docker container, you can not read the config file by the method shown above. 
+It is necessary to mount the config file on the container. For example ``-v CONFIGFILE:/CONFIGFILE``
 
 License
 -------

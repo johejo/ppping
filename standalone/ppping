@@ -310,7 +310,7 @@ class PPPing(object):
     def _display(self):
         for arg, line in zip(self.args, self.lines):
             try:
-                out = subprocess.run([self._p_cmd, arg]+self._p_opt.split(),
+                out = subprocess.run([self._p_cmd, self._p_opt, arg],
                                      check=True, stdout=subprocess.PIPE,
                                      stderr=subprocess.DEVNULL,
                                      timeout=self.timeout,

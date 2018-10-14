@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-readonly PYTHON_COMMAND=python3
-readonly SCRIPT_DIR=$(cd $(dirname $0);pwd)
-readonly PARENT_DIR=$(cd $(dirname $0);cd ..;pwd)
-readonly PPPING_DIR=${PARENT_DIR}/ppping
-readonly GENERATED=${SCRIPT_DIR}/ppping
+PYTHON_COMMAND=python3
+SCRIPT_DIR=$(cd $(dirname $0);pwd)
+PARENT_DIR=$(cd $(dirname $0);cd ..;pwd)
+PPPING_DIR=${PARENT_DIR}/ppping
+GENERATED=${SCRIPT_DIR}/ppping
 
 echo -e "#!/usr/bin/env ${PYTHON_COMMAND}\n\"\"\"" > ${GENERATED}
 cat ${PARENT_DIR}/LICENSE >> ${GENERATED}
