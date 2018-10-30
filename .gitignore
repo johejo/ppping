@@ -109,3 +109,4 @@ venv.bak/
 debug.py
 .pytest_cache/
 /README.html
+.vscode/
