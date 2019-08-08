@@ -11,7 +11,7 @@ ppping
     :target: https://raw.githubusercontent.com/johejo/ppping/master/LICENSE
 
 .. image:: https://img.shields.io/docker/automated/johejo/ppping
-    :target: https://cloud.docker.com/repository/docker/johejo/ppping
+    :target: https://hub.docker.com/r/johejo/ppping
     :alt: Docker Automated build
 
 .. image:: https://api.codeclimate.com/v1/badges/aea7bbd42d3b4cf5b4ae/maintainability
