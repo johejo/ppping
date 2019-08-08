@@ -1,4 +1,4 @@
-FROM python:3.7-alpine3.8
+FROM python:3.7-alpine3.10
 LABEL maintainer="mitsuo_h@outlook.com"
 
 RUN set -ex && \

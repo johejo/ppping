@@ -10,6 +10,10 @@ ppping
 .. image:: https://img.shields.io/github/license/johejo/ppping.svg
     :target: https://raw.githubusercontent.com/johejo/ppping/master/LICENSE
 
+.. image:: https://img.shields.io/docker/automated/johejo/ppping
+    :target: https://cloud.docker.com/repository/docker/johejo/ppping
+    :alt: Docker Automated build
+
 .. image:: https://api.codeclimate.com/v1/badges/aea7bbd42d3b4cf5b4ae/maintainability
    :target: https://codeclimate.com/github/johejo/ppping/maintainability
    :alt: Maintainability
